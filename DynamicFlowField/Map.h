@@ -1,6 +1,9 @@
 #pragma once
 #include <vector>
 #include <SFML\System\Vector2.hpp>
+#include <fstream>
+#include <sstream>
+
 #include "FlowGenerator.h"
 #include "PathPlanner.h"
 
@@ -17,6 +20,10 @@ public:
 	~Map();
 
 	void loadMap(std::string &mapName);
+	void saveMap();
+
+	MapMain& getMap() { return mMapMain; }
+	MapFlow& getMapFlow() { return mMapFlow; }
 
 private:
 	MapMain mMapMain;

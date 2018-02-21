@@ -31,15 +31,18 @@
     <Filter Include="Source Files\State">
       <UniqueIdentifier>{33aee4f4-18c8-4ae5-a75d-cf7014589741}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Utility">
+      <UniqueIdentifier>{30254efe-1562-4c73-8908-0548bcfe66a1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Utility">
+      <UniqueIdentifier>{ed5089fa-1691-4e7d-a6ca-89bee01fea9b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Game.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="PerformanceMonitor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Agent.cpp">
@@ -60,24 +63,24 @@
     <ClCompile Include="PathPlanner.cpp">
       <Filter>Source Files\Map</Filter>
     </ClCompile>
-    <ClCompile Include="StateEditMap.cpp">
-      <Filter>Source Files\State</Filter>
-    </ClCompile>
-    <ClCompile Include="StateRunGame.cpp">
-      <Filter>Source Files\State</Filter>
-    </ClCompile>
-    <ClCompile Include="GameState.cpp">
-      <Filter>Source Files\State</Filter>
-    </ClCompile>
     <ClCompile Include="StateBase.cpp">
       <Filter>Source Files\State</Filter>
+    </ClCompile>
+    <ClCompile Include="EditMap.cpp">
+      <Filter>Source Files\State</Filter>
+    </ClCompile>
+    <ClCompile Include="RunGame.cpp">
+      <Filter>Source Files\State</Filter>
+    </ClCompile>
+    <ClCompile Include="PerformanceMonitor.cpp">
+      <Filter>Source Files\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="EntityManager.cpp">
+      <Filter>Source Files\Entity</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PerformanceMonitor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Agent.h">
@@ -101,14 +104,20 @@
     <ClInclude Include="StateBase.h">
       <Filter>Header Files\State</Filter>
     </ClInclude>
-    <ClInclude Include="GameState.h">
-      <Filter>Header Files\State</Filter>
-    </ClInclude>
     <ClInclude Include="EditMap.h">
       <Filter>Header Files\State</Filter>
     </ClInclude>
     <ClInclude Include="RunGame.h">
       <Filter>Header Files\State</Filter>
+    </ClInclude>
+    <ClInclude Include="GameStates.h">
+      <Filter>Header Files\State</Filter>
+    </ClInclude>
+    <ClInclude Include="EntityManager.h">
+      <Filter>Header Files\Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="PerformanceMonitor.h">
+      <Filter>Header Files\Utility</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
