@@ -10,7 +10,8 @@ RunGame * RunGame::instance()
 void RunGame::enter(sf::RenderWindow& window)
 {
 	mWindow = &window;
-	// Load recent map
+	std::string test = "lol";
+	Map::instance()->loadMap(test);
 }
 
 void RunGame::update(Game* game)
@@ -20,11 +21,12 @@ void RunGame::update(Game* game)
 
 void RunGame::render()
 {
-
+	Map::instance()->render(*mWindow);
 }
 
 void RunGame::exit()
 {
+	Map::instance()->unloadMap();
 	// Unload entities and map
 }
 
