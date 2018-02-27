@@ -4,7 +4,7 @@ static int MAPSIZE = 30;
 
 Game::Game()
 {
-	mWindow.create(sf::VideoMode(800, 800), "Dynamic Flow Field", sf::Style::Close);
+	mWindow.create(sf::VideoMode(1000, 1000), "Dynamic Flow Field", sf::Style::Close);
 
 	// Initial state
 	m_currentState = RunGame::instance();
@@ -25,10 +25,12 @@ void Game::run()
 	{
 		sf::Event event;
 		while (mWindow.pollEvent(event))
+		{
+			// Send event to current game state to handle themselves
 			m_currentState->propagateEvent(this, event);
-
-		Game::update();
-		Game::render();
+		}
+		update();
+		render();
 	}
 }
 
@@ -61,6 +63,7 @@ void Game::changeState(StateBase * newState)
 
 		m_currentState = newState;
 
+		// Pass window for easier referencing in states
 		m_currentState->enter(mWindow);
 	}
 

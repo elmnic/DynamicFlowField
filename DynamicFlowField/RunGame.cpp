@@ -21,7 +21,7 @@ void RunGame::update(Game* game)
 
 void RunGame::render()
 {
-	Map::instance()->render(*mWindow);
+	Map::instance()->render(*mWindow); // Dereference window pointer
 }
 
 void RunGame::exit()
@@ -32,7 +32,7 @@ void RunGame::exit()
 
 void RunGame::propagateEvent(Game* game, sf::Event& event)
 {
-	if (event.type == sf::Event::Closed || event.key.code == sf::Keyboard::Escape)
+	if (event.type == sf::Event::Closed || (mWindow->hasFocus() && event.key.code == sf::Keyboard::Escape))
 		mWindow->close();
 	if (event.type == sf::Event::KeyReleased && event.key.code == sf::Keyboard::C)
 		game->changeState(EditMap::instance());

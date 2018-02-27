@@ -18,11 +18,15 @@ Map::~Map()
 
 void Map::loadMap(std::string & mapName)
 {
+	// Clear map before loading new
+	unloadMap();
+
 	std::ifstream mapFile("resources/Debug.dat");
 	std::vector<int> vectorTemp;
 	std::string str;
+	char delimiter = ';';
 
-	while (getline(mapFile, str))
+	while (getline(mapFile, str, delimiter))
 	{
 		std::istringstream ss(str);
 		int in;
@@ -58,7 +62,7 @@ void Map::render(sf::RenderWindow& window)
 			rect.setOutlineColor(sf::Color::Black);
 			rect.setOutlineThickness(2.5f);
 			
-			switch (mMapMain[i][j])
+			switch (mMapMain[i][j]) 
 			{
 			case 0:
 				rect.setFillColor(sf::Color::Green);
@@ -77,14 +81,4 @@ void Map::render(sf::RenderWindow& window)
 			}
 		}
 	}
-}
-
-int Map::getWidth()
-{
-	return mMapMain[0].size();
-}
-
-int Map::getHeight()
-{
-	return mMapMain.size();
 }

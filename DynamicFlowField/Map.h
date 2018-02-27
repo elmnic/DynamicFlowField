@@ -8,6 +8,8 @@
 #include "FlowGenerator.h"
 #include "PathPlanner.h"
 
+
+
 // 2D-vector containing the IDs of buildings and ground
 typedef std::vector<std::vector<int>> MapMain;
 
@@ -17,11 +19,13 @@ typedef std::vector<std::vector<sf::Vector2f>> MapFlow;
 class Map
 {
 public:
+	enum BuildingType { OFFENSIVE, DEFENSIVE };
+
 	static Map* instance();
 	~Map();
 
 	//TODO: bool return
-	void loadMap(std::string &mapName);
+	void loadMap(std::string &mapName); // TODO: Change map file to contain building coordinates and type inste
 	void unloadMap();
 	void saveMap(); //TODO:
 
@@ -30,12 +34,14 @@ public:
 
 	MapMain& getMap() { return mMapMain; }
 	MapFlow& getMapFlow() { return mMapFlow; }
-	int getWidth();
-	int getHeight();
+	int getWidth() { return mMapMain[0].size(); }
+	int getHeight() { return mMapMain.size(); }
 
 private:
 	Map();
 	MapMain mMapMain;
 	MapFlow mMapFlow;
+
+
 };
 

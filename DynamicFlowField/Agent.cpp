@@ -15,6 +15,6 @@ void Agent::update()
 {
 }
 
-void Agent::render(sf::RenderWindow window)
+void Agent::render(sf::RenderWindow& window)
 {
 }
