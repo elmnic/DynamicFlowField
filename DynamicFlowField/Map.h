@@ -4,10 +4,12 @@
 #include <SFML\Graphics.hpp>
 #include <fstream>
 #include <sstream>
+#include <iostream>
 
 #include "FlowGenerator.h"
 #include "PathPlanner.h"
-
+#include "Entity.h"
+#include "EntityManager.h"
 
 
 // 2D-vector containing the IDs of buildings and ground
@@ -16,16 +18,16 @@ typedef std::vector<std::vector<int>> MapMain;
 // 2D-vector containing direction vectors
 typedef std::vector<std::vector<sf::Vector2f>> MapFlow;
 
+
 class Map
 {
 public:
-	enum BuildingType { OFFENSIVE, DEFENSIVE };
 
 	static Map* instance();
 	~Map();
 
-	//TODO: bool return
-	void loadMap(std::string &mapName); // TODO: Change map file to contain building coordinates and type inste
+	//TODO: bool return maybe
+	void loadMap(std::string &mapName);
 	void unloadMap();
 	void saveMap(); //TODO:
 
@@ -42,6 +44,13 @@ private:
 	MapMain mMapMain;
 	MapFlow mMapFlow;
 
+	EntityManager *mEntityManager;
+
+	// Converts string to enum
+	Toolbox::StringCode hashit(std::string const& str);
+
+	void setMapSize(std::string line);
+	void loadBuilding(std::string line, Toolbox::BuildingType type);
 
 };
 

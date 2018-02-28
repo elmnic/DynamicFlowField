@@ -144,6 +144,7 @@
     <ClCompile Include="StateBase.cpp" />
     <ClCompile Include="EditMap.cpp" />
     <ClCompile Include="RunGame.cpp" />
+    <ClCompile Include="Toolbox.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Agent.h" />
@@ -153,6 +154,7 @@
     <ClInclude Include="FlowGenerator.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="GameStates.h" />
+    <ClInclude Include="Toolbox.h" />
     <ClInclude Include="Map.h" />
     <ClInclude Include="PathPlanner.h" />
     <ClInclude Include="PerformanceMonitor.h" />

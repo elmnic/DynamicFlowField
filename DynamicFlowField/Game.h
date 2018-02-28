@@ -5,6 +5,7 @@
 
 #include "Map.h"
 #include "GameStates.h"
+#include "EntityManager.h"
 
 class StateBase;
 

@@ -21,7 +21,9 @@ void RunGame::update(Game* game)
 
 void RunGame::render()
 {
-	Map::instance()->render(*mWindow); // Dereference window pointer
+	Map::instance()->render(*mWindow);
+	EntityManager::instance()->render(*mWindow);
+
 }
 
 void RunGame::exit()

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <SFML\Graphics.hpp>
-#include "Map.h"
+#include "Toolbox.h"
 
 class Entity
 {

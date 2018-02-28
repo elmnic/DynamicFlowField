@@ -1,10 +1,11 @@
 #pragma once
 #include "Entity.h"
+
 class Building :
 	public Entity
 {
 public:
-	Building(int size, Map::BuildingType type);
+	Building(int size, Toolbox::BuildingType type, sf::Vector2i pos);
 	virtual ~Building();
 
 	virtual void update();
@@ -12,7 +13,8 @@ public:
 	int getSize() { return mSize; }
 private:
 	int mSize;
-	Map::BuildingType mType;
+	Toolbox::BuildingType mType;
+	sf::Vector2i mPosition;
 	
 	// Info representing how big and what kind of building
 	// which is used when rendering to determine which sprite to use
