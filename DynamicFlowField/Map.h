@@ -5,6 +5,7 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <map>
 
 #include "FlowGenerator.h"
 #include "PathPlanner.h"
@@ -26,7 +27,7 @@ public:
 	static Map* instance();
 	~Map();
 
-	//TODO: bool return maybe
+	//TODO: bool return maybe probably not
 	void loadMap(std::string &mapName);
 	void unloadMap();
 	void saveMap(); //TODO:

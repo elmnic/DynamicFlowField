@@ -1,5 +1,4 @@
 #include "Map.h"
-#include "Building.h"
 
 
 Map* Map::instance()
@@ -114,13 +113,12 @@ void Map::unloadMap()
 
 void Map::render(sf::RenderWindow& window)
 {
-	float sizeX = window.getSize().x / Toolbox::getMapDimensions().x;
-	float sizeY = window.getSize().y / Toolbox::getMapDimensions().y;
-	
+	float sizeX = (float) (window.getSize().x / Toolbox::getMapDimensions().x);
+	float sizeY = (float) (window.getSize().y / Toolbox::getMapDimensions().y);
 
-	for (int i = 0; i < mMapMain.size(); i++)
+	for (size_t i = 0; i < mMapMain.size(); i++)
 	{
-		for (int j = 0; j < mMapMain[i].size(); j++)
+		for (size_t j = 0; j < mMapMain[i].size(); j++)
 		{
 			sf::Vector2f pos = sf::Vector2f(j * sizeX, i * sizeY);
 

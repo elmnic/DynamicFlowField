@@ -18,5 +18,6 @@ private:
 	
 	// Info representing how big and what kind of building
 	// which is used when rendering to determine which sprite to use
+	// Should also have a struct that maps the coords to each building
 };
 
