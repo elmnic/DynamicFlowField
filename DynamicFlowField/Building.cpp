@@ -22,8 +22,8 @@ void Building::update()
 
 void Building::render(sf::RenderWindow& window)
 {
-	float sizeX = window.getSize().x / Toolbox::getMapDimensions().x;
-	float sizeY = window.getSize().y / Toolbox::getMapDimensions().y;
+	float sizeX = (float)(window.getSize().x / Toolbox::getMapDimensions().x);
+	float sizeY = (float)(window.getSize().y / Toolbox::getMapDimensions().y);
 
 	for (int i = 0; i < mSize; i++)
 	{
@@ -40,6 +40,4 @@ void Building::render(sf::RenderWindow& window)
 			window.draw(rect);
 		}
 	}
-
-
 }

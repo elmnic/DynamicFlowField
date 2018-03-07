@@ -27,7 +27,6 @@ public:
 	static Map* instance();
 	~Map();
 
-	//TODO: bool return maybe probably not
 	void loadMap(std::string &mapName);
 	void unloadMap();
 	void saveMap(); //TODO:

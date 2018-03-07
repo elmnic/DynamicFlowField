@@ -69,7 +69,7 @@ void Map::loadMap(std::string & mapName)
 	// Clear map before loading new
 	unloadMap();
 
-	std::ifstream mapFile("resources/Debug.dat");
+	std::ifstream mapFile(Toolbox::getLevel(Toolbox::LevelCode::LevelDebug));
 	std::vector<int> vectorTemp;
 	std::string str;
 	char delimiter = ';';
@@ -104,6 +104,32 @@ void Map::loadMap(std::string & mapName)
 			break;
 		}
 	}
+
+	// TESTS ############################################
+	Building *building = mEntityManager->isBuilding(EntityManager::Point(0, 0));
+	if (building == nullptr)
+		std::cout << "Is building: false " << building << std::endl;
+	else
+		std::cout << "Is building: true  " << building << std::endl;
+
+	building = mEntityManager->isBuilding(EntityManager::Point(1, 1));
+	if (building == nullptr)
+		std::cout << "Is building: false " << building << std::endl;
+	else
+		std::cout << "Is building: true  " << building << std::endl;
+
+	building = mEntityManager->isBuilding(EntityManager::Point(2, 2));
+	if (building == nullptr)
+		std::cout << "Is building: false " << building << std::endl;
+	else
+		std::cout << "Is building: true  " << building << std::endl;
+
+	building = mEntityManager->isBuilding(EntityManager::Point(4, 2));
+	if (building == nullptr)
+		std::cout << "Is building: false " << building << std::endl;
+	else
+		std::cout << "Is building: true  " << building << std::endl;
+
 }
 
 void Map::unloadMap()
@@ -113,8 +139,8 @@ void Map::unloadMap()
 
 void Map::render(sf::RenderWindow& window)
 {
-	float sizeX = (float) (window.getSize().x / Toolbox::getMapDimensions().x);
-	float sizeY = (float) (window.getSize().y / Toolbox::getMapDimensions().y);
+	float sizeX = (float)(window.getSize().x / Toolbox::getMapDimensions().x);
+	float sizeY = (float)(window.getSize().y / Toolbox::getMapDimensions().y);
 
 	for (size_t i = 0; i < mMapMain.size(); i++)
 	{

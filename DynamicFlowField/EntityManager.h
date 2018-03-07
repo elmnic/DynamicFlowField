@@ -12,6 +12,10 @@ class EntityManager
 {
 public:
 
+	typedef std::pair<int, int> Point;
+	typedef std::vector<Entity*> EntityVector;
+	typedef std::map<Point, Building*> BuildingMap;
+
 	static EntityManager* instance();
 	~EntityManager();
 
@@ -20,66 +24,17 @@ public:
 	void update();
 	void render(sf::RenderWindow &window);
 
+	Building* isBuilding(Point point);
+
 private:
 	EntityManager();
 
-	struct BuildingRegion
-	{
-		BuildingRegion(int size, sf::Vector2i pos)
-		{
-			xMin = pos.x;
-			xMax = xMin + size;
-			yMin = pos.y;
-			yMax = yMin + size;
-		}
-
-		int xMin;
-		int yMin;
-		int xMax;
-		int yMax;
-
-		// Helper method to determine if a point is in region
-		bool isInRegion(int x, int y)
-		{
-			return xMin <= x && x <= xMax && yMin <= y && y <= yMax;
-		}
-
-		bool operator<(const BuildingRegion &right) const
-		{
-			if (xMin == right.xMin)
-			{
-				if (yMin == right.yMin)
-				{
-					if (xMax == right.xMax)
-					{
-						return yMax < right.yMax;
-					}
-					else
-					{
-						return xMax < right.xMax;
-					}
-				}
-				else
-				{
-					return yMin < right.yMin;
-				}
-			}
-			else
-			{
-				return xMin < right.xMin;
-			}
-		}
-	};
 
 	// Entities
-	typedef std::vector<Entity*> EntityVector;
 	EntityVector mBuildings;
 	EntityVector mAgents;
 
-	typedef std::vector<BuildingRegion*> RegionVector;
-	RegionVector mRegions;
-
-	// Map coordinate regions to specific building
-	std::map<BuildingRegion*, Building*> mBuildingMap;
+	// Map coordinate to specific building
+	BuildingMap mBuildingMap;
 };
 
