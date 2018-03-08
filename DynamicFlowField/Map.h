@@ -51,6 +51,7 @@ private:
 
 	void setMapSize(std::string line);
 	void loadBuilding(std::string line, Toolbox::BuildingType type);
+	void loadAgent(std::string line);
 
 };
 

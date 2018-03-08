@@ -7,7 +7,6 @@ Building::Building(int size, Toolbox::BuildingType type, sf::Vector2i pos) :
 	mType(type),
 	mPosition(pos)
 {
-	// Use mSize to determine which blocks around mPosition will belong to the same building
 }
 
 
@@ -17,7 +16,6 @@ Building::~Building()
 
 void Building::update()
 {
-	// Check if dead
 }
 
 void Building::render(sf::RenderWindow& window)
@@ -40,4 +38,9 @@ void Building::render(sf::RenderWindow& window)
 			window.draw(rect);
 		}
 	}
+}
+
+void Building::kill()
+{
+	mAlive = false;
 }

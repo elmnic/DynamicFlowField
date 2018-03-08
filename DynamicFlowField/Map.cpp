@@ -21,6 +21,7 @@ Toolbox::StringCode Map::hashit(std::string const & str)
 	if (str == "Map") return Toolbox::StringCode::MapSize;
 	if (str == "Off") return Toolbox::StringCode::Offensive;
 	if (str == "Def") return Toolbox::StringCode::Defensive;
+	if (str == "Age") return Toolbox::StringCode::Agent;
 
 	return Toolbox::StringCode::Null;
 }
@@ -36,7 +37,7 @@ void Map::setMapSize(std::string line)
 		temp.push_back(std::stoi(output));
 	}
 	sf::Vector2i size(temp[0], temp[1]);
-	Toolbox::instance()->setMapDimensions(size); // Save dimensions in toolbox
+	Toolbox::setMapDimensions(size); // Save dimensions in toolbox
 	mMapMain.resize(size.y, std::vector<int>(size.x, 0)); // Resize and init map matrix to 0
 
 }
@@ -61,6 +62,23 @@ void Map::loadBuilding(std::string line, Toolbox::BuildingType type)
 
 	//Create building entity
 	mEntityManager->createBuilding(size, type, coords);
+}
+
+void Map::loadAgent(std::string line)
+{
+	std::istringstream ss(line);
+	std::string output;
+	std::vector<int> temp;
+
+	// Retrieve coords
+	while (std::getline(ss, output, ','))
+	{
+		temp.push_back(std::stoi(output));
+	}
+	sf::Vector2i coords(temp[0], temp[1]);
+
+	// Create agent entity
+	mEntityManager->createAgent(coords);
 }
 
 
@@ -100,36 +118,13 @@ void Map::loadMap(std::string & mapName)
 		case Toolbox::StringCode::Defensive:
 			loadBuilding(restOfLine, Toolbox::BuildingType::DEFENSIVE);
 			break;
+		case Toolbox::StringCode::Agent:
+			loadAgent(restOfLine);
+			break;
 		default:
 			break;
 		}
 	}
-
-	// TESTS ############################################
-	Building *building = mEntityManager->isBuilding(EntityManager::Point(0, 0));
-	if (building == nullptr)
-		std::cout << "Is building: false " << building << std::endl;
-	else
-		std::cout << "Is building: true  " << building << std::endl;
-
-	building = mEntityManager->isBuilding(EntityManager::Point(1, 1));
-	if (building == nullptr)
-		std::cout << "Is building: false " << building << std::endl;
-	else
-		std::cout << "Is building: true  " << building << std::endl;
-
-	building = mEntityManager->isBuilding(EntityManager::Point(2, 2));
-	if (building == nullptr)
-		std::cout << "Is building: false " << building << std::endl;
-	else
-		std::cout << "Is building: true  " << building << std::endl;
-
-	building = mEntityManager->isBuilding(EntityManager::Point(4, 2));
-	if (building == nullptr)
-		std::cout << "Is building: false " << building << std::endl;
-	else
-		std::cout << "Is building: true  " << building << std::endl;
-
 }
 
 void Map::unloadMap()

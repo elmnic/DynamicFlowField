@@ -16,7 +16,7 @@ void RunGame::enter(sf::RenderWindow& window)
 
 void RunGame::update(Game* game)
 {
-	// Game loop
+	EntityManager::instance()->update();
 }
 
 void RunGame::render()

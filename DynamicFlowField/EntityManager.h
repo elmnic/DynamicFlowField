@@ -29,6 +29,8 @@ public:
 private:
 	EntityManager();
 
+	void removeDeadEntities();
+
 
 	// Entities
 	EntityVector mBuildings;

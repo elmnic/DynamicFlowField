@@ -5,7 +5,8 @@ static int MAPSIZE = 30;
 Game::Game()
 {
 	mWindow.create(sf::VideoMode(1000, 1000), "Dynamic Flow Field", sf::Style::Close);
-
+	mWindow.setFramerateLimit(60);
+	Toolbox::setWindow(&mWindow);
 	// Initial state
 	m_currentState = RunGame::instance();
 	m_currentState->enter(mWindow);
@@ -21,8 +22,10 @@ Game::~Game()
 // Main loop
 void Game::run()
 {
+	sf::Clock clock;
 	while (mWindow.isOpen())
 	{
+		Toolbox::instance()->setDeltaTime(clock.restart());
 		sf::Event event;
 		while (mWindow.pollEvent(event))
 		{

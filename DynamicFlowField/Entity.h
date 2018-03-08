@@ -11,5 +11,7 @@ public:
 
 	virtual void update() = 0;
 	virtual void render(sf::RenderWindow& window) = 0;
+	virtual void kill() = 0;
+	virtual bool isAlive() = 0;
 };
 

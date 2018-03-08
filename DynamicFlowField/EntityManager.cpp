@@ -12,7 +12,6 @@ EntityManager::EntityManager()
 {
 }
 
-
 EntityManager::~EntityManager()
 {
 	for (auto it : mBuildings)
@@ -32,6 +31,31 @@ EntityManager::~EntityManager()
 	mBuildingMap.clear();
 }
 
+void EntityManager::removeDeadEntities()
+{
+	// Deletes all dead buildings
+	EntityVector buildings = mBuildings;
+	mBuildings.clear();
+	for (auto it : buildings)
+	{
+		if (it->isAlive())
+			mBuildings.push_back(it);
+		else
+			delete it;
+	}
+
+	// Deletes all dead agents
+	EntityVector agents = mAgents;
+	mAgents.clear();
+	for (auto it : agents)
+	{
+		if (it->isAlive())
+			mAgents.push_back(it);
+		else
+			delete it;
+	}
+}
+
 void EntityManager::createBuilding(int size, Toolbox::BuildingType type, sf::Vector2i pos)
 {
 	Building *building = new Building(size, type, pos);
@@ -41,27 +65,20 @@ void EntityManager::createBuilding(int size, Toolbox::BuildingType type, sf::Vec
 	{
 		for (int j = 0; j < size; j++)
 		{
-			Point p(std::make_pair(pos.x + i, pos.y + j));
+			Point p(pos.x + i, pos.y + j);
 			mBuildingMap.insert(std::make_pair(p, building));
 		}
 	}
 
 	// Add building to vector
 	mBuildings.push_back(building);
-
-	/*BuildingRegion *region = new BuildingRegion(size, pos);
-
-	// Map region to building
-	mBuildingMap.emplace(region, building);
-
-	// Add region and building to respective container
-	mRegions.push_back(region);
-	mBuildings.push_back(building);*/
 }
 
 void EntityManager::createAgent(sf::Vector2i startPos)
 {
 	//TODO:
+	Agent *agent = new Agent(startPos);
+	mAgents.push_back(agent);
 }
 
 void EntityManager::update()
@@ -71,6 +88,8 @@ void EntityManager::update()
 
 	for (auto it : mAgents)
 		it->update();
+
+	removeDeadEntities();
 }
 
 void EntityManager::render(sf::RenderWindow & window)
