@@ -15,13 +15,13 @@ public:
 
 	int getSize() { return mSize; }
 private:
+	Toolbox::TextureCode buildingToTexture(Toolbox::BuildingType type);
+
 	bool mAlive = true;
 	int mSize;
 	Toolbox::BuildingType mType;
 	sf::Vector2i mPosition;
 	
-	// Info representing how big and what kind of building
-	// which is used when rendering to determine which sprite to use
-	// Should also have a struct that maps the coords to each building. Check
+	sf::Sprite mSprite;
 };
 

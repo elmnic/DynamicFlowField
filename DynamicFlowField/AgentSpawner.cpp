@@ -3,6 +3,7 @@
 #include <chrono>
 #include <thread>
 #include <iostream>
+#include <sstream>
 
 AgentSpawner* AgentSpawner::instance()
 {
@@ -20,12 +21,20 @@ AgentSpawner::~AgentSpawner()
 	clear();
 }
 
+// Increments mTimeElapsed with deltaTime and spawns agents if enough time has passed
 void AgentSpawner::update()
 {
-	std::cout << "Time elapsed: " << mTimeElapsed << "\r";
-	mTimeElapsed += Toolbox::getDeltaTime().asSeconds();
+	//std::cout << "Time elapsed: " << mTimeElapsed << "\r";
+
 	if (mRunning)
 	{
+		// Increment time
+		mTimeElapsed += Toolbox::getDeltaTime().asSeconds();
+
+		// Convert mTimeElapsed to string and send it to TextRenderer
+		std::ostringstream stringTemp;
+		stringTemp << mTimeElapsed;
+		mText->setString("Time elapsed: " + stringTemp.str());
 		// Terminate spawning if needed
 		if (Toolbox::getTerminateSimulation())
 		{
@@ -51,8 +60,13 @@ void AgentSpawner::update()
 
 void AgentSpawner::run()
 {
+	// Only reset timer if simulation is not already running
 	if (!mRunning)
+	{
+		mText = new sf::Text(sf::String("_"), Toolbox::getFont());
+		TextRenderer::instance()->addTextElement(mText);
 		mTimeElapsed = 0;
+	}
 	mRunning = true;
 }
 

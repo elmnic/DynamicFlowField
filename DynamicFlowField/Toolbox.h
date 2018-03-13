@@ -4,10 +4,14 @@
 
 struct Toolbox
 {
+private:
+	Toolbox();
 
+public:
 	enum StringCode { MapSize, Offensive, Defensive, Agent, Null };
 	enum BuildingType { OFFENSIVE, DEFENSIVE };
 	enum LevelCode { LevelDebug, Level1, Level2 };
+	enum TextureCode { BUILDING, WALL, AGENT };
 
 	static Toolbox* instance();
 
@@ -25,4 +29,9 @@ struct Toolbox
 
 	static bool getTerminateSimulation();
 	static void setTerminateSimulation(bool value);
+
+	static sf::Font& getFont();
+
+	static sf::Texture& getTexture(TextureCode code);
+
 };

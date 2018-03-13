@@ -17,4 +17,5 @@ private:
 	RunGame& operator=(const RunGame&);
 
 	sf::RenderWindow* mWindow;
+	sf::Text* mStateText;
 };

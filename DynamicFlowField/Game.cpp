@@ -8,9 +8,11 @@ Game::Game()
 	mWindow.setFramerateLimit(60);
 	Toolbox::setWindow(&mWindow);
 	// Initial state
+	/*mStateText = new sf::Text();
+	TextRenderer::instance()->addTextElement(mStateText);*/
 	m_currentState = RunGame::instance();
 	m_currentState->enter(mWindow);
-	printCurrentState();
+	//updateCurrentState();
 }
 
 
@@ -52,10 +54,6 @@ void Game::render()
 
 }
 
-void Game::printCurrentState()
-{
-	std::cout << "State: " << m_currentState->getStateID() << "\r";
-}
 
 void Game::changeState(StateBase * newState)
 {
@@ -66,9 +64,7 @@ void Game::changeState(StateBase * newState)
 
 		m_currentState = newState;
 
-		// Pass window for easier referencing in states
+		// Pass window for easier referencing in states. Deprecated... Window reference is stored in Toolbox
 		m_currentState->enter(mWindow);
 	}
-
-	printCurrentState();
 }

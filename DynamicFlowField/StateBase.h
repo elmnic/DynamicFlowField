@@ -1,5 +1,6 @@
 #pragma once
 #include "Map.h"
+#include "TextRenderer.h"
 #include <SFML\Graphics.hpp>
 
 class Game;
@@ -28,6 +29,22 @@ public:
 
 	// Return the enum for the current state
 	virtual StateID getStateID() = 0;
+
+	virtual std::string stateToString(StateID state)
+	{
+		switch (state)
+		{
+		case StateBase::RUNGAME:
+			return "Run Game";
+			break;
+		case StateBase::EDITMAP:
+			return "Edit Map";
+			break;
+		default:
+			return "Null";
+			break;
+		}
+	}
 
 };
 

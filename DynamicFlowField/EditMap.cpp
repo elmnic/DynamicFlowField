@@ -11,6 +11,9 @@ EditMap * EditMap::instance()
 void EditMap::enter(sf::RenderWindow& window)
 {
 	mWindow = &window;
+
+	mStateText = new sf::Text("Edit Map", Toolbox::getFont());
+	TextRenderer::instance()->addTextElement(mStateText);
 }
 
 void EditMap::update(Game* game)
@@ -22,12 +25,13 @@ void EditMap::update(Game* game)
 
 void EditMap::render()
 {
-
+	TextRenderer::instance()->render();
 }
 
 void EditMap::exit()
 {
 	// Unload map and entities
+	TextRenderer::instance()->clearTextElements(); 
 }
 
 void EditMap::propagateEvent(Game* game, sf::Event& event)

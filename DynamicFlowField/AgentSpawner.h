@@ -1,6 +1,7 @@
 #pragma once
 
 #include "EntityManager.h"
+#include "TextRenderer.h"
 
 class AgentSpawner
 {
@@ -25,5 +26,7 @@ private:
 	float mTimeElapsed = 0.0f;
 
 	bool mRunning = false;
+
+	sf::Text* mText;
 };
 

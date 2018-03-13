@@ -4,7 +4,18 @@
 
 Agent::Agent(sf::Vector2i pos)
 {
-	mPosition = sf::Vector2f(pos.x * Toolbox::getMapBlockSize().x, pos.y * Toolbox::getMapBlockSize().y);
+	// Set texture and scale it to fit in one block
+	mSprite.setTexture(Toolbox::getTexture(Toolbox::TextureCode::AGENT));
+	float sizeX = Toolbox::getMapBlockSize().x;
+	float sizeY = Toolbox::getMapBlockSize().y;
+
+	// How much bigger the texture is compared to the block
+	float scaleX = mSprite.getTexture()->getSize().x / sizeX;
+	float scaleY = mSprite.getTexture()->getSize().y / sizeY;
+
+	// Reset sprite size to fit block
+	mSprite.scale(sf::Vector2f(1 / scaleX, 1 / scaleY));
+	mSprite.setPosition(sf::Vector2f((float)pos.x * sizeX, (float)pos.y * sizeY));
 }
 
 
@@ -14,22 +25,23 @@ Agent::~Agent()
 
 void Agent::update()
 {
-	mPosition += mVelocity * Toolbox::getDeltaTime().asSeconds();
+	mSprite.move(mVelocity * Toolbox::getDeltaTime().asSeconds());
 }
 
 void Agent::render(sf::RenderWindow& window)
 {
-	// Get the size of a block on the map
-	sf::Vector2f size = Toolbox::getMapBlockSize();
+	window.draw(mSprite);
+	//// Get the size of a block on the map
+	//sf::Vector2f size = Toolbox::getMapBlockSize();
 
-	// Create a circle with diameter of block size
-	sf::CircleShape circle(size.x / 2);
-	circle.setPosition(mPosition);
-	circle.setOutlineColor(sf::Color::Black);
-	circle.setOutlineThickness(1.f);
+	//// Create a circle with diameter of block size
+	//sf::CircleShape circle(size.x / 2);
+	//circle.setPosition(mPosition);
+	//circle.setOutlineColor(sf::Color::Black);
+	//circle.setOutlineThickness(1.f);
 
-	circle.setFillColor(sf::Color::White);
-	window.draw(circle);
+	//circle.setFillColor(sf::Color::White);
+	//window.draw(circle);
 }
 
 void Agent::kill()

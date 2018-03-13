@@ -17,5 +17,6 @@ private:
 	EditMap& operator=(const EditMap&);
 
 	sf::RenderWindow* mWindow;
+	sf::Text* mStateText;
 };
 

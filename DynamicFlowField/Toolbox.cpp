@@ -2,11 +2,21 @@
 #include <atomic>
 
 static sf::Vector2i mMapDimensions;
-static std::string mDebugLevel = "resources/Debug.dat";
+static std::string mLevelDebug = "resources/Debug.dat";
 static std::string mLevel1 = "resources/Debug.dat";
 static sf::RenderWindow* mWindow;
 static sf::Time mTime;
 static sf::Vector2f mBlockSize;
+
+static std::string mFontFile = "resources/Freeroad Regular.ttf";
+static sf::Font mFont;
+
+static sf::Texture mTextureBuilding;
+static sf::Texture mTextureWall;
+static sf::Texture mTextureAgent;
+static std::string mTextureFileBuilding = "resources/hus.png";
+static std::string mTextureFileWall = "resources/vagg.png";
+static std::string mTextureFileAgent = "resources/gubbe.png";
 
 static std::atomic<bool> mTerminateSimulation = false;
 
@@ -21,7 +31,7 @@ std::string Toolbox::getLevel(LevelCode code)
 	switch (code)
 	{
 	case Toolbox::LevelDebug:
-		return mDebugLevel;
+		return mLevelDebug;
 		break;
 	case Toolbox::Level1:
 		return mLevel1;
@@ -29,10 +39,18 @@ std::string Toolbox::getLevel(LevelCode code)
 	case Toolbox::Level2:
 		break;
 	default:
-		return mDebugLevel;
+		return mLevelDebug;
 		break;
 	}
-	return mDebugLevel;
+	return mLevelDebug;
+}
+
+Toolbox::Toolbox()
+{
+	mFont.loadFromFile(mFontFile);
+	mTextureBuilding.loadFromFile(mTextureFileBuilding);
+	mTextureWall.loadFromFile(mTextureFileWall);
+	mTextureAgent.loadFromFile(mTextureFileAgent);
 }
 
 
@@ -80,4 +98,28 @@ bool Toolbox::getTerminateSimulation()
 void Toolbox::setTerminateSimulation(bool value)
 {
 	mTerminateSimulation = value;
+}
+
+sf::Font& Toolbox::getFont()
+{
+	return mFont;
+}
+
+sf::Texture& Toolbox::getTexture(TextureCode code)
+{
+	switch (code)
+	{
+	case Toolbox::BUILDING:
+		return mTextureBuilding;
+		break;
+	case Toolbox::WALL:
+		return mTextureWall;
+		break;
+	case Toolbox::AGENT:
+		return mTextureAgent;
+		break;
+	default:
+		return mTextureBuilding;
+		break;
+	}
 }

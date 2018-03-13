@@ -12,6 +12,9 @@ void RunGame::enter(sf::RenderWindow& window)
 	mWindow = &window;
 	std::string test = "lol";
 	Map::instance()->loadMap(test);
+
+	mStateText = new sf::Text("Run Game", Toolbox::getFont());
+	TextRenderer::instance()->addTextElement(mStateText);
 }
 
 void RunGame::update(Game* game)
@@ -23,13 +26,14 @@ void RunGame::render()
 {
 	Map::instance()->render(*mWindow);
 	EntityManager::instance()->render(*mWindow);
-
+	TextRenderer::instance()->render();
 }
 
 void RunGame::exit()
 {
 	Map::instance()->unloadMap();
 	EntityManager::instance()->exit();
+	TextRenderer::instance()->clearTextElements();
 }
 
 void RunGame::propagateEvent(Game* game, sf::Event& event)

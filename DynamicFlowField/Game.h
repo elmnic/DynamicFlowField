@@ -6,6 +6,7 @@
 #include "Map.h"
 #include "GameStates.h"
 #include "EntityManager.h"
+#include "TextRenderer.h"
 
 class StateBase;
 
@@ -22,10 +23,8 @@ private:
 	void update();
 	void render();
 
-	void printCurrentState();
 
 	sf::RenderWindow mWindow;
-	
 	StateBase* m_currentState;
 };
 
