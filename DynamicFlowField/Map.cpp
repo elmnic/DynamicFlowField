@@ -69,6 +69,11 @@ void Map::loadAgent(std::string line)
 	std::istringstream ss(line);
 	std::string output;
 	std::vector<int> temp;
+	float spawnTime = 0;
+
+	// Retrieve spawn time
+	std::getline(ss, output, ',');
+	spawnTime = std::stof(output);
 
 	// Retrieve coords
 	while (std::getline(ss, output, ','))
@@ -77,8 +82,8 @@ void Map::loadAgent(std::string line)
 	}
 	sf::Vector2i coords(temp[0], temp[1]);
 
-	// Create agent entity
-	mEntityManager->createAgent(coords);
+	// Queue agent entity
+	mEntityManager->queueAgent(coords, spawnTime);
 }
 
 
@@ -167,4 +172,9 @@ void Map::render(sf::RenderWindow& window)
 			}
 		}
 	}
+}
+
+void Map::startSimulation()
+{
+	mEntityManager->startAgentSpawner();
 }

@@ -22,4 +22,7 @@ struct Toolbox
 
 	static void setDeltaTime(sf::Time time);
 	static sf::Time& getDeltaTime();
+
+	static bool getTerminateSimulation();
+	static void setTerminateSimulation(bool value);
 };

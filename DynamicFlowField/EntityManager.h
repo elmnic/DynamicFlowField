@@ -8,6 +8,8 @@
 #include "Agent.h"
 #include "Building.h"
 
+class AgentSpawner;
+
 class EntityManager
 {
 public:
@@ -21,8 +23,13 @@ public:
 
 	void createBuilding(int size, Toolbox::BuildingType type, sf::Vector2i pos);
 	void createAgent(sf::Vector2i startPos);
+	void queueAgent(sf::Vector2i startPos, float spawnTime);
 	void update();
 	void render(sf::RenderWindow &window);
+
+	void exit();
+
+	void startAgentSpawner();
 
 	Building* isBuilding(Point point);
 
@@ -31,12 +38,12 @@ private:
 
 	void removeDeadEntities();
 
-
 	// Entities
 	EntityVector mBuildings;
 	EntityVector mAgents;
 
 	// Map coordinate to specific building
 	BuildingMap mBuildingMap;
+
 };
 

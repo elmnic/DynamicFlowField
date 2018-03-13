@@ -29,7 +29,7 @@ void RunGame::render()
 void RunGame::exit()
 {
 	Map::instance()->unloadMap();
-	// Unload entities and map
+	EntityManager::instance()->exit();
 }
 
 void RunGame::propagateEvent(Game* game, sf::Event& event)
@@ -38,6 +38,11 @@ void RunGame::propagateEvent(Game* game, sf::Event& event)
 		mWindow->close();
 	if (event.type == sf::Event::KeyReleased && event.key.code == sf::Keyboard::C)
 		game->changeState(EditMap::instance());
+	if (event.type == sf::Event::KeyReleased && event.key.code == sf::Keyboard::T)
+		Toolbox::setTerminateSimulation(false);
+	if (event.type == sf::Event::KeyReleased && event.key.code == sf::Keyboard::S)
+		Map::instance()->startSimulation();
+	
 }
 
 StateBase::StateID RunGame::getStateID()

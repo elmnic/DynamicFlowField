@@ -33,6 +33,7 @@ public:
 
 	void render(sf::RenderWindow& window);
 
+	void startSimulation();
 
 	MapMain& getMap() { return mMapMain; }
 	MapFlow& getMapFlow() { return mMapFlow; }

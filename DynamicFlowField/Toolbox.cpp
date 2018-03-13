@@ -1,4 +1,5 @@
 #include "Toolbox.h"
+#include <atomic>
 
 static sf::Vector2i mMapDimensions;
 static std::string mDebugLevel = "resources/Debug.dat";
@@ -7,6 +8,7 @@ static sf::RenderWindow* mWindow;
 static sf::Time mTime;
 static sf::Vector2f mBlockSize;
 
+static std::atomic<bool> mTerminateSimulation = false;
 
 Toolbox* Toolbox::instance()
 {
@@ -68,4 +70,14 @@ void Toolbox::setDeltaTime(sf::Time time)
 sf::Time& Toolbox::getDeltaTime()
 {
 	return mTime;
+}
+
+bool Toolbox::getTerminateSimulation()
+{
+	return mTerminateSimulation;
+}
+
+void Toolbox::setTerminateSimulation(bool value)
+{
+	mTerminateSimulation = value;
 }
