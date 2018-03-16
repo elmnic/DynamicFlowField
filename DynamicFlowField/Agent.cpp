@@ -25,23 +25,13 @@ Agent::~Agent()
 
 void Agent::update()
 {
+	// Retrieve velocity from flow field instead
 	mSprite.move(mVelocity * Toolbox::getDeltaTime().asSeconds());
 }
 
 void Agent::render(sf::RenderWindow& window)
 {
 	window.draw(mSprite);
-	//// Get the size of a block on the map
-	//sf::Vector2f size = Toolbox::getMapBlockSize();
-
-	//// Create a circle with diameter of block size
-	//sf::CircleShape circle(size.x / 2);
-	//circle.setPosition(mPosition);
-	//circle.setOutlineColor(sf::Color::Black);
-	//circle.setOutlineThickness(1.f);
-
-	//circle.setFillColor(sf::Color::White);
-	//window.draw(circle);
 }
 
 void Agent::kill()

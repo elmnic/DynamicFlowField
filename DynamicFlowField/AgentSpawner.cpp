@@ -3,7 +3,6 @@
 #include <chrono>
 #include <thread>
 #include <iostream>
-#include <sstream>
 
 AgentSpawner* AgentSpawner::instance()
 {
@@ -24,17 +23,13 @@ AgentSpawner::~AgentSpawner()
 // Increments mTimeElapsed with deltaTime and spawns agents if enough time has passed
 void AgentSpawner::update()
 {
-	//std::cout << "Time elapsed: " << mTimeElapsed << "\r";
-
 	if (mRunning)
 	{
 		// Increment time
 		mTimeElapsed += Toolbox::getDeltaTime().asSeconds();
 
 		// Convert mTimeElapsed to string and send it to TextRenderer
-		std::ostringstream stringTemp;
-		stringTemp << mTimeElapsed;
-		mText->setString("Time elapsed: " + stringTemp.str());
+		mText->setString("Time elapsed: " + Toolbox::floatToString(mTimeElapsed));
 		// Terminate spawning if needed
 		if (Toolbox::getTerminateSimulation())
 		{

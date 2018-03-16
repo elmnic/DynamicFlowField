@@ -9,6 +9,7 @@ Map* Map::instance()
 
 Map::Map()
 {
+	mRenderTexture.create(Toolbox::getWindow().getSize().x, Toolbox::getWindow().getSize().y);
 	mEntityManager = EntityManager::instance();
 }
 
@@ -130,17 +131,11 @@ void Map::loadMap(std::string & mapName)
 			break;
 		}
 	}
-}
 
-void Map::unloadMap()
-{
-	mMapMain.clear();
-}
-
-void Map::render(sf::RenderWindow& window)
-{
-	float sizeX = (float)(window.getSize().x / Toolbox::getMapDimensions().x);
-	float sizeY = (float)(window.getSize().y / Toolbox::getMapDimensions().y);
+	// Render background tiles to a separate texture 
+	float sizeX = Toolbox::getMapBlockSize().x;
+	float sizeY = Toolbox::getMapBlockSize().y;
+	mRenderTexture.clear();
 
 	for (size_t i = 0; i < mMapMain.size(); i++)
 	{
@@ -152,26 +147,25 @@ void Map::render(sf::RenderWindow& window)
 			rect.setPosition(pos);
 			rect.setOutlineColor(sf::Color::Black);
 			rect.setOutlineThickness(1.f);
-			
-			switch (mMapMain[i][j]) 
-			{
-			case 0:
-				rect.setFillColor(sf::Color::Green);
-				window.draw(rect);
-				break;
-			case 1:
-				rect.setFillColor(sf::Color::Blue);
-				window.draw(rect);
-				break;
-			case 2:
-				rect.setFillColor(sf::Color::Magenta);
-				window.draw(rect);
-				break;
-			default:
-				break;
-			}
+			rect.setFillColor(sf::Color::Green);
+			mRenderTexture.draw(rect);
 		}
 	}
+
+	// Finish drawing to texture
+	mRenderTexture.display();
+
+}
+
+void Map::unloadMap()
+{
+	mMapMain.clear();
+}
+
+void Map::render(sf::RenderWindow& window)
+{
+	sf::Sprite map(mRenderTexture.getTexture());
+	window.draw(map);
 }
 
 void Map::startSimulation()

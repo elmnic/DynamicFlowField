@@ -1,6 +1,8 @@
 #pragma once
 
 #include <SFML\Graphics.hpp>
+#include <atomic>
+#include <sstream>
 
 struct Toolbox
 {
@@ -33,5 +35,9 @@ public:
 	static sf::Font& getFont();
 
 	static sf::Texture& getTexture(TextureCode code);
+
+	static std::string floatToString(float f);
+
+	static sf::Vector2i globalToIndexCoords(sf::Vector2i pos);
 
 };

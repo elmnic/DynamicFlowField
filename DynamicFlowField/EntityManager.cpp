@@ -42,7 +42,8 @@ void EntityManager::removeDeadEntities()
 			delete it;
 	}
 }
-
+//TODO: Render all buildings to a render texture for increased performance. 
+//TODO: Update this render texture everytime the building entities are removed
 void EntityManager::createBuilding(int size, Toolbox::BuildingType type, sf::Vector2i pos)
 {
 	Building *building = new Building(size, type, pos);

@@ -26,5 +26,7 @@ private:
 
 	sf::RenderWindow mWindow;
 	StateBase* m_currentState;
+	sf::Text* mFPStext;
+	float mFPSdelay;
 };
 

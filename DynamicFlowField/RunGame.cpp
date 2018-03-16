@@ -46,6 +46,8 @@ void RunGame::propagateEvent(Game* game, sf::Event& event)
 		Toolbox::setTerminateSimulation(false);
 	if (event.type == sf::Event::KeyReleased && event.key.code == sf::Keyboard::S)
 		Map::instance()->startSimulation();
+	if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
+		PathPlanner::instance()->generatePath(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
 	
 }
 

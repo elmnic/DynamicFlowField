@@ -1,6 +1,8 @@
 #pragma once
 #include "StateBase.h"
 
+#include "PathPlanner.h"
+
 class RunGame : public StateBase
 {
 public:

@@ -1,5 +1,4 @@
 #include "Toolbox.h"
-#include <atomic>
 
 static sf::Vector2i mMapDimensions;
 static std::string mLevelDebug = "resources/Debug.dat";
@@ -122,4 +121,24 @@ sf::Texture& Toolbox::getTexture(TextureCode code)
 		return mTextureBuilding;
 		break;
 	}
+}
+
+std::string Toolbox::floatToString(float f)
+{
+	std::ostringstream stringTemp;
+	stringTemp << f;
+	return stringTemp.str();
+}
+
+// Convert mouse position to a coordinate on the 2D grid
+sf::Vector2i Toolbox::globalToIndexCoords(sf::Vector2i pos)
+{
+	float xTileSize = getMapBlockSize().x;
+	float yTileSize = getMapBlockSize().y;
+
+	int mouseX = (int)(pos.x / xTileSize);
+	int mouseY = (int)(pos.y / yTileSize);
+
+	sf::Vector2i mouseIndex(mouseX, mouseY);
+	return mouseIndex;
 }

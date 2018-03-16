@@ -14,6 +14,7 @@ public:
 	virtual bool isAlive() { return mAlive; }
 
 	int getSize() { return mSize; }
+	Toolbox::BuildingType getType() { return mType; }
 private:
 	Toolbox::TextureCode buildingToTexture(Toolbox::BuildingType type);
 
