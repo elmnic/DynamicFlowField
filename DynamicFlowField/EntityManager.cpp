@@ -68,6 +68,16 @@ void EntityManager::createAgent(sf::Vector2i startPos)
 	mAgents.push_back(agent);
 }
 
+void EntityManager::createConfirmed(sf::Vector2i pos)
+{
+	// Used to check if point has been confirmed
+	Building *building = new Building(1, Toolbox::BuildingType::POLYPOINT, pos);
+	Point p(pos.x, pos.y);
+	mBuildingMap.insert(std::make_pair(p, building));
+
+	mConfirmed.push_back(building);
+}
+
 void EntityManager::queueAgent(sf::Vector2i startPos, float spawnTime)
 {
 	// Actually add to AgentSpawner here
@@ -110,6 +120,9 @@ void EntityManager::render(sf::RenderWindow & window)
 
 	for (auto it : mAgents)
 		it->render(window);
+
+	for (auto it : mConfirmed)
+		it->render(window);
 }
 
 void EntityManager::exit()
@@ -131,4 +144,23 @@ void EntityManager::exit()
 	mBuildingMap.clear();
 
 	AgentSpawner::instance()->clear();
+}
+
+void EntityManager::clearConfirmed()
+{
+	for (size_t i = 0; i < mBuildings.size(); i++)
+	{
+		Building* b = (Building*)mBuildings[i];
+		b->clearPolyPoint();
+	}
+
+	for (size_t i = 0; i < mConfirmed.size(); i++)
+	{
+		Building* b = (Building*)mConfirmed[i];
+		Point p(b->getPosition().x, b->getPosition().y);
+		mBuildingMap.erase(p);
+
+		delete mConfirmed[i];
+	}
+	mConfirmed.clear();
 }

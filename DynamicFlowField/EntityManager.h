@@ -23,11 +23,13 @@ public:
 
 	void createBuilding(int size, Toolbox::BuildingType type, sf::Vector2i pos);
 	void createAgent(sf::Vector2i startPos);
+	void createConfirmed(sf::Vector2i pos);
 	void queueAgent(sf::Vector2i startPos, float spawnTime);
 	void update();
 	void render(sf::RenderWindow &window);
 
 	void exit();
+	void clearConfirmed();
 
 	void startAgentSpawner();
 
@@ -40,6 +42,7 @@ private:
 
 	// Entities
 	EntityVector mBuildings;
+	EntityVector mConfirmed;
 	EntityVector mAgents;
 
 	// Map coordinate to specific building

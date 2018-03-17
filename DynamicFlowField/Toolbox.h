@@ -11,9 +11,9 @@ private:
 
 public:
 	enum StringCode { MapSize, Offensive, Defensive, Agent, Null };
-	enum BuildingType { OFFENSIVE, DEFENSIVE };
+	enum BuildingType { OFFENSIVE, DEFENSIVE, POLYPOINT };
 	enum LevelCode { LevelDebug, Level1, Level2 };
-	enum TextureCode { BUILDING, WALL, AGENT };
+	enum TextureCode { BUILDING, WALL, AGENT, POLY };
 
 	static Toolbox* instance();
 
@@ -38,6 +38,9 @@ public:
 
 	static std::string floatToString(float f);
 
-	static sf::Vector2i globalToIndexCoords(sf::Vector2i pos);
+	static sf::Vector2i globalToIndexCoords(sf::Vector2i& pos);
+	static sf::Vector2i localToGlobalCoords(sf::Vector2i& localPos);
+
+	static int pointInPoly(int nrOfVerts, std::vector<float>& vertX, std::vector<float>& vertY, float testX, float testY);
 
 };

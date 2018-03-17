@@ -33,6 +33,8 @@ public:
 	~PathPlanner();
 
 	FlowGenerator::FlowField generatePath(sf::Vector2i startPos);
+	void render();
+	void clear();
 
 	// Breadth-first-search from startPos
 		// Create a field of weights using BFS nodes
@@ -43,9 +45,11 @@ private:
 	PathPlanner();
 
 	void expandChildren(WeightNode* current);
+	void recreatePath(Queue& cameFrom, WeightNode* node);
 
 	Queue mNodeQueue;
 	LookupTable mNodeLookup;
 	int mIterations;
+	Queue mShortestPath;
 };
 

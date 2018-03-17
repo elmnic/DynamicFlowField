@@ -12,62 +12,30 @@ PathPlanner::PathPlanner()
 {
 }
 
-void PathPlanner::expandChildren(WeightNode* current)
+
+PathPlanner::~PathPlanner()
 {
-	for (int i = 0; i < 4; i++)
+}
+
+void PathPlanner::render()
+{
+	if (!mShortestPath.empty())
 	{
-		int iX, iY;
-		switch (i)
+		for (auto node : mShortestPath)
 		{
-		case 0:
-			iX = 0;
-			iY = -1;
-			break;
-		case 1:
-			iX = 0;
-			iY = 1;
-			break;
-		case 2:
-			iX = -1;
-			iY = 0;
-			break;
-		case 3:
-			iX = 1;
-			iY = 0;
-		default:
-			break;
-		}
-
-		// Create temp point
-		EntityManager::Point p = std::make_pair(current->position.x + iX, current->position.y + iY);
-		LookupTable::iterator search = mNodeLookup.find(p);
-
-		if (search != mNodeLookup.end()) // If point exists
-		{
-			// If new node has a shorter path and if it is already visited, continue
-			WeightNode* node = search->second;
-			if (node->weight < current->weight + 1 && node->visited)
-				continue;
-			else
-			{
-				// Current path is shorter. Update weight and parent. (Will probably never happen since it is BFS)
-				node->weight = current->weight + 1;
-				node->parent = current;
-			}
-		}
-		else
-		{
-			// Create new node and add to map and children queue
-			WeightNode* node = new WeightNode(sf::Vector2i(p.first, p.second), current->weight + 1, current);
-			mNodeLookup[p] = node;
-			current->children.push_back(node);
+			sf::CircleShape circle(Toolbox::getMapBlockSize().x / 4);
+			circle.setFillColor(sf::Color::Red);
+			circle.setPosition(node->position.x * Toolbox::getMapBlockSize().x, node->position.y * Toolbox::getMapBlockSize().y);
+			Toolbox::getWindow().draw(circle);
 		}
 	}
 }
 
-
-PathPlanner::~PathPlanner()
+void PathPlanner::clear()
 {
+	for (auto it : mShortestPath)
+		delete it;
+	mShortestPath.clear();
 }
 
 FlowGenerator::FlowField PathPlanner::generatePath(sf::Vector2i startPos)
@@ -75,8 +43,26 @@ FlowGenerator::FlowField PathPlanner::generatePath(sf::Vector2i startPos)
 	// Convert global coords to local index in matrix
 	sf::Vector2i localCoordIndex = Toolbox::globalToIndexCoords(startPos);
 
-	// Add start node
-	EntityManager::Point pStart = std::make_pair(localCoordIndex.x, localCoordIndex.y);
+	// Create start node
+	EntityManager::Point pStart(localCoordIndex.x, localCoordIndex.y);
+
+	// Check if startPos is already confirmed. Exit and use pre-existing flow field if true
+	Building* testFor = EntityManager::instance()->isBuilding(pStart);
+	std::cout << testFor << std::endl;
+	if (testFor != nullptr && testFor->getType() == Toolbox::BuildingType::POLYPOINT)
+	{
+		std::cout << "Start pos was already confirmed \n" << testFor << "\n";
+		return FlowGenerator::FlowField();
+	}
+
+	// Check if start was on a building. Deny if true
+	if (testFor != nullptr && (testFor->getType() == Toolbox::BuildingType::OFFENSIVE || testFor->getType() == Toolbox::BuildingType::DEFENSIVE))
+	{
+		std::cout << "Start was on building \n";
+		return FlowGenerator::FlowField();
+	}
+
+	// Add first node to queue
 	WeightNode* nStart = new WeightNode(localCoordIndex, 0);
 	mNodeLookup[pStart] = nStart;
 	mNodeQueue.push_back(nStart);
@@ -89,7 +75,7 @@ FlowGenerator::FlowField PathPlanner::generatePath(sf::Vector2i startPos)
 	{
 		mIterations++;
 
-		// Dequeue
+		// Retrieve front of queue
 		WeightNode* current = mNodeQueue.front();
 		mNodeQueue.pop_front();
 
@@ -99,18 +85,26 @@ FlowGenerator::FlowField PathPlanner::generatePath(sf::Vector2i startPos)
 		// Check each child for target and if they've been visited
 		for (auto child : current->children)
 		{
-			EntityManager::Point point = std::make_pair(child->position.x, child->position.y);
+			EntityManager::Point point(child->position.x, child->position.y);
 			Building* target = EntityManager::instance()->isBuilding(point);
 
-			// If child exists and it is on a building
+			// Skip defensive building
+			if (target != nullptr && target->getType() == Toolbox::BuildingType::DEFENSIVE)
+				continue;
+			
+			// If target is on an offensive building
 			if (target != nullptr && target->getType() == Toolbox::BuildingType::OFFENSIVE)
 			{
-				std::cout << "Found building! " << mIterations << " iterations" << "\n";
+				//std::cout << "Found building! " << mIterations << " iterations" << "\n";
+				//TODO: Use FlowGenerator to create flow field from building position. Preferably avoiding the other tiles of the building
 				foundBuilding = true;
+				target->addPolyPoint(localCoordIndex);
+				EntityManager::instance()->createConfirmed(localCoordIndex);
+				recreatePath(mShortestPath, child);
 				break;
 			}
 
-			// Add unvisited child to back of queue
+			// Add unvisited offensive child to back of queue
 			if (!child->visited)
 			{
 				mNodeQueue.push_back(child);
@@ -119,6 +113,7 @@ FlowGenerator::FlowField PathPlanner::generatePath(sf::Vector2i startPos)
 		}
 	}
 
+	// Clear after finishing
 	for (std::map<EntityManager::Point, WeightNode*>::iterator it = mNodeLookup.begin(), next_it = mNodeLookup.begin(); it != mNodeLookup.end(); it = next_it)
 	{
 		next_it = it; ++next_it;
@@ -128,4 +123,57 @@ FlowGenerator::FlowField PathPlanner::generatePath(sf::Vector2i startPos)
 	mNodeQueue.clear();
 
 	return FlowGenerator::FlowField();
+}
+
+void PathPlanner::expandChildren(WeightNode* current)
+{
+	for (int i = -1; i <= 1; i++)
+	{
+		for (int j = -1; j <=1; j++)
+		{
+			// Skip itself
+			if (i == 0 && j == 0)
+				continue;
+			// Skip nodes outside horizontally
+			if (current->position.x + i < 0 || current->position.x + i > Toolbox::getMapDimensions().x)
+				continue;
+			// Skip nodes outside vertically
+			if (current->position.y + j < 0 || current->position.y + j > Toolbox::getMapDimensions().y)
+				continue;
+
+			// Create temp point
+			EntityManager::Point p = std::make_pair(current->position.x + i, current->position.y + j);
+			LookupTable::iterator search = mNodeLookup.find(p);
+
+			if (search != mNodeLookup.end()) // If point exists
+			{
+				// If new node has a shorter path and if it is already visited, continue
+				WeightNode* node = search->second;
+				if (node->weight <= current->weight + 1 && node->visited)
+					continue;
+				else
+				{
+					// Current path is shorter. Update weight and parent.
+					node->weight = current->weight + 1;
+					node->parent = current;
+				}
+			}
+			else
+			{
+				// Create new node and add to map and children queue
+				WeightNode* node = new WeightNode(sf::Vector2i(p.first, p.second), current->weight + 1, current);
+				mNodeLookup[p] = node;
+				current->children.push_back(node);
+			}
+		}
+	}
+}
+
+void PathPlanner::recreatePath(Queue & cameFrom, WeightNode* node)
+{
+	cameFrom.push_front(node);
+	if (node->parent == nullptr)
+		return;
+	else
+		recreatePath(cameFrom, node->parent);
 }

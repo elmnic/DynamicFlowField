@@ -85,7 +85,7 @@
       <Filter>Source Files\Entity</Filter>
     </ClCompile>
     <ClCompile Include="TextRenderer.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Utility</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -135,7 +135,7 @@
       <Filter>Header Files\Entity</Filter>
     </ClInclude>
     <ClInclude Include="TextRenderer.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Utility</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

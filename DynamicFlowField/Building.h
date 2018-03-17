@@ -13,9 +13,21 @@ public:
 	virtual void kill();
 	virtual bool isAlive() { return mAlive; }
 
+	//------------------- Building specific functions
+
 	int getSize() { return mSize; }
 	Toolbox::BuildingType getType() { return mType; }
+	sf::Vector2i& getPosition() { return mPosition; }
+
+	// Polygon for confirming flow direction
+	void addPolyPoint(sf::Vector2i point);
+	void clearPolyPoint();
+	std::vector<sf::Vector2i>& getPolyPoints() { return mIndices; }
+
+	void toggleIndices();
 private:
+
+	// Convert BuildingType enum to TextureCode enum
 	Toolbox::TextureCode buildingToTexture(Toolbox::BuildingType type);
 
 	bool mAlive = true;
@@ -24,5 +36,15 @@ private:
 	sf::Vector2i mPosition;
 	
 	sf::Sprite mSprite;
+
+	bool mRenderIndices;
+
+	// Index in polygon containing confirmed closest points leading to this building
+	std::vector<sf::Vector2i> mIndices;
+
+	// Vector containing agent search points acting like corners in a polygon
+	// Agent positions become confirmed points 
+	// Need at least two agents to create a field of confirmed points
+
 };
 

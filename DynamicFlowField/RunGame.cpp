@@ -15,6 +15,7 @@ void RunGame::enter(sf::RenderWindow& window)
 
 	mStateText = new sf::Text("Run Game", Toolbox::getFont());
 	TextRenderer::instance()->addTextElement(mStateText);
+
 }
 
 void RunGame::update(Game* game)
@@ -25,6 +26,7 @@ void RunGame::update(Game* game)
 void RunGame::render()
 {
 	Map::instance()->render(*mWindow);
+	PathPlanner::instance()->render();
 	EntityManager::instance()->render(*mWindow);
 	TextRenderer::instance()->render();
 }
@@ -33,12 +35,14 @@ void RunGame::exit()
 {
 	Map::instance()->unloadMap();
 	EntityManager::instance()->exit();
+	EntityManager::instance()->clearConfirmed();
 	TextRenderer::instance()->clearTextElements();
+	PathPlanner::instance()->clear();
 }
 
 void RunGame::propagateEvent(Game* game, sf::Event& event)
 {
-	if (event.type == sf::Event::Closed || (mWindow->hasFocus() && event.key.code == sf::Keyboard::Escape))
+	if (event.type == sf::Event::Closed || (mWindow->hasFocus() && event.type == sf::Event::KeyReleased && event.key.code == sf::Keyboard::Escape))
 		mWindow->close();
 	if (event.type == sf::Event::KeyReleased && event.key.code == sf::Keyboard::C)
 		game->changeState(EditMap::instance());
@@ -46,8 +50,24 @@ void RunGame::propagateEvent(Game* game, sf::Event& event)
 		Toolbox::setTerminateSimulation(false);
 	if (event.type == sf::Event::KeyReleased && event.key.code == sf::Keyboard::S)
 		Map::instance()->startSimulation();
+	if (event.type == sf::Event::KeyReleased && event.key.code == sf::Keyboard::Space)
+	{ 
+		// Clear pathing graphics
+		PathPlanner::instance()->clear();
+		EntityManager::instance()->clearConfirmed();
+	}
 	if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
 		PathPlanner::instance()->generatePath(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
+	if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Right)
+	{ 
+		// Show area of confirmed points from building
+		sf::Vector2i mouseCoords(event.mouseButton.x, event.mouseButton.y);
+		sf::Vector2i localCoords = Toolbox::globalToIndexCoords(mouseCoords);
+		EntityManager::Point point = std::make_pair(localCoords.x, localCoords.y);
+		Building* building = EntityManager::instance()->isBuilding(point);
+		if (building != nullptr && building->getType() == Toolbox::BuildingType::OFFENSIVE)
+			building->toggleIndices();
+	}
 	
 }
 

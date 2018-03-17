@@ -13,9 +13,11 @@ static sf::Font mFont;
 static sf::Texture mTextureBuilding;
 static sf::Texture mTextureWall;
 static sf::Texture mTextureAgent;
+static sf::Texture mTextureConfirmed;
 static std::string mTextureFileBuilding = "resources/hus.png";
 static std::string mTextureFileWall = "resources/vagg.png";
 static std::string mTextureFileAgent = "resources/gubbe.png";
+static std::string mTextureFileConfirmed = "resources/confirmed.png";
 
 static std::atomic<bool> mTerminateSimulation = false;
 
@@ -46,10 +48,12 @@ std::string Toolbox::getLevel(LevelCode code)
 
 Toolbox::Toolbox()
 {
+	// Load textures
 	mFont.loadFromFile(mFontFile);
 	mTextureBuilding.loadFromFile(mTextureFileBuilding);
 	mTextureWall.loadFromFile(mTextureFileWall);
 	mTextureAgent.loadFromFile(mTextureFileAgent);
+	mTextureConfirmed.loadFromFile(mTextureFileConfirmed);
 }
 
 
@@ -117,6 +121,9 @@ sf::Texture& Toolbox::getTexture(TextureCode code)
 	case Toolbox::AGENT:
 		return mTextureAgent;
 		break;
+	case Toolbox::POLY:
+		return mTextureConfirmed;
+		break;
 	default:
 		return mTextureBuilding;
 		break;
@@ -131,7 +138,7 @@ std::string Toolbox::floatToString(float f)
 }
 
 // Convert mouse position to a coordinate on the 2D grid
-sf::Vector2i Toolbox::globalToIndexCoords(sf::Vector2i pos)
+sf::Vector2i Toolbox::globalToIndexCoords(sf::Vector2i& pos)
 {
 	float xTileSize = getMapBlockSize().x;
 	float yTileSize = getMapBlockSize().y;
@@ -141,4 +148,24 @@ sf::Vector2i Toolbox::globalToIndexCoords(sf::Vector2i pos)
 
 	sf::Vector2i mouseIndex(mouseX, mouseY);
 	return mouseIndex;
+}
+
+sf::Vector2i Toolbox::localToGlobalCoords(sf::Vector2i& localPos)
+{
+	int globalX = localPos.x * getMapBlockSize().x;
+	int globalY = localPos.y * getMapBlockSize().y;
+
+	sf::Vector2i global(globalX, globalY);
+	return global;
+}
+
+int Toolbox::pointInPoly(int nrOfVerts, std::vector<float>& vertX, std::vector<float>& vertY, float testX, float testY)
+{
+	int i, j, c = 0;
+	for (i = 0, j = nrOfVerts - 1; i < nrOfVerts; j = i++) {
+		if (((vertY[i]>testY) != (vertY[j]>testY)) &&
+			(testX < (vertX[j] - vertX[i]) * (testY - vertY[i]) / (vertY[j] - vertY[i]) + vertX[i]))
+			c = !c;
+	}
+	return c;
 }
