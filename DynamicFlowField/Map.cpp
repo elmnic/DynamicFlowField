@@ -100,7 +100,6 @@ void Map::loadMap(std::string & mapName)
 
 	while (std::getline(mapFile, str, delimiter))
 	{
-		std::cout << str << "\n";
 		std::istringstream ss(str);
 		std::string id;
 		
@@ -110,7 +109,6 @@ void Map::loadMap(std::string & mapName)
 		
 		// Retrieve id from line
 		std::getline(ss, id, ',');
-		std::cout << "Id: " << id << "\n";
 
 		// Send rest of line to other function for further work
 		switch (hashit(id))

@@ -35,15 +35,21 @@ void Building::update()
 
 void Building::render(sf::RenderWindow& window)
 {
+	if (mRenderIndices)
+		mSprite.setColor(sf::Color(0, 128, 34));
+	else
+		mSprite.setColor(sf::Color::White);
+
 	window.draw(mSprite);
+
+	// Draw lines between building middle and indices middle
 	if (mRenderIndices)
 	{
-		for (auto it : mIndices)
+		sf::Vector2f startPoint = getMiddleOfBuildingGlobal();
+		for (auto point : mIndices)
 		{
-			sf::CircleShape circle(Toolbox::getMapBlockSize().x / 2);
-			circle.setFillColor(sf::Color::Blue);
-			circle.setPosition(sf::Vector2f(it.x * Toolbox::getMapBlockSize().x, it.y * Toolbox::getMapBlockSize().y));
-			window.draw(circle);
+			sf::Vector2f globalCoords = Toolbox::localToGlobalCoords(point);
+			LineRenderer::instance()->renderLine(startPoint, Toolbox::getMiddleOfBlock(globalCoords));
 		}
 	}
 }
@@ -53,10 +59,91 @@ void Building::kill()
 	mAlive = false;
 }
 
+sf::Vector2f Building::getMiddleOfBuildingGlobal()
+{
+	float xBlockSize = Toolbox::getMapBlockSize().x;
+	float yBlockSize = Toolbox::getMapBlockSize().y;
+	float xGlobalMid = mPosition.x * xBlockSize + (xBlockSize * mSize) / 2;
+	float yGlobalMid = mPosition.y * yBlockSize + (yBlockSize * mSize) / 2;
+	sf::Vector2f middleCoords(xGlobalMid, yGlobalMid);
+	return middleCoords;
+}
+
 // Store polygon indices in global coords
 void Building::addPolyPoint(sf::Vector2i point)
 {
-	mIndices.push_back(point);
+	// Building has less than two points, no covering polygon possible
+	if (mIndices.size() < 2)
+		mIndices.push_back(point);
+	else
+	{
+		std::vector<float> vertX;
+		std::vector<float> vertY;
+		// Add building middle
+		vertX.push_back(this->getMiddleOfBuildingGlobal().x);
+		vertY.push_back(this->getMiddleOfBuildingGlobal().y);
+		
+		// Add global point coords to test vector
+		for (auto point : mIndices)
+		{
+			sf::Vector2f global = Toolbox::localToGlobalCoords(point);
+			sf::Vector2f middle = Toolbox::getMiddleOfBlock(global);
+			vertX.push_back(middle.x);
+			vertY.push_back(middle.y);
+		}
+		// Test new point
+		sf::Vector2f global = Toolbox::localToGlobalCoords(point);
+		sf::Vector2f middle = Toolbox::getMiddleOfBlock(global);
+		int inOut = Toolbox::pointInPoly(mIndices.size() + 1, vertX, vertY, middle.x, middle.y);
+		std::cout << "point in polygon: " << inOut << "\n";
+		if (!inOut)
+			mIndices.push_back(point);
+
+		// Remove old points that are now inside polygon
+		sortPolyPoints();
+		
+	}
+}
+
+void Building::sortPolyPoints()
+{
+	std::vector<float> vertX;
+	std::vector<float> vertY;
+
+	std::vector<sf::Vector2i> indices = mIndices;
+	mIndices.clear();
+
+	for (size_t i = 0; i < indices.size(); i++)
+	{
+		// Add building middle
+		vertX.push_back(this->getMiddleOfBuildingGlobal().x);
+		vertY.push_back(this->getMiddleOfBuildingGlobal().y);
+
+		// Add all other points to poly test vector
+		for (size_t j = 0; j < indices.size(); j++)
+		{
+			// Skip itself
+			if (i != j)
+			{
+				sf::Vector2f global = Toolbox::localToGlobalCoords(indices[j]);
+				sf::Vector2f middle = Toolbox::getMiddleOfBlock(global);
+				vertX.push_back(middle.x);
+				vertY.push_back(middle.y);
+			}
+		}
+
+		// Create test point
+		sf::Vector2f testPoint = Toolbox::localToGlobalCoords(indices[i]);
+		sf::Vector2f testPointMiddle = Toolbox::getMiddleOfBlock(testPoint);
+
+		// Test if old point is inside polygon. Keep those that are still outside
+		int inOut = Toolbox::pointInPoly(indices.size(), vertX, vertY, testPointMiddle.x, testPointMiddle.y);
+		if (!inOut)
+			mIndices.push_back(indices[i]);
+
+		vertX.clear();
+		vertY.clear();
+	}
 }
 
 void Building::clearPolyPoint()
@@ -67,7 +154,7 @@ void Building::clearPolyPoint()
 void Building::toggleIndices()
 {
 	std::cout << "Nr of indices: " << mIndices.size() << "\n";
-	//mRenderIndices = !mRenderIndices;
+	mRenderIndices = !mRenderIndices;
 }
 
 Toolbox::TextureCode Building::buildingToTexture(Toolbox::BuildingType type)

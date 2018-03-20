@@ -29,10 +29,13 @@ public:
 	void render(sf::RenderWindow &window);
 
 	void exit();
+
+	// Removes stored points from buildings and the Confirmed-buildings
 	void clearConfirmed();
 
 	void startAgentSpawner();
 
+	// Returns a pointer to the building if it exists, otherwise it returns nullptr
 	Building* isBuilding(Point point);
 
 private:
@@ -45,7 +48,7 @@ private:
 	EntityVector mConfirmed;
 	EntityVector mAgents;
 
-	// Map coordinate to specific building
+	// Building entities mapped to points
 	BuildingMap mBuildingMap;
 
 };

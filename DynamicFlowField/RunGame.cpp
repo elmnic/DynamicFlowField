@@ -57,18 +57,18 @@ void RunGame::propagateEvent(Game* game, sf::Event& event)
 		EntityManager::instance()->clearConfirmed();
 	}
 	if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
-		PathPlanner::instance()->generatePath(sf::Vector2i(event.mouseButton.x, event.mouseButton.y));
-	if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Right)
-	{ 
+	{
 		// Show area of confirmed points from building
-		sf::Vector2i mouseCoords(event.mouseButton.x, event.mouseButton.y);
+		sf::Vector2f mouseCoords((float)event.mouseButton.x, (float)event.mouseButton.y);
 		sf::Vector2i localCoords = Toolbox::globalToIndexCoords(mouseCoords);
-		EntityManager::Point point = std::make_pair(localCoords.x, localCoords.y);
+		EntityManager::Point point(localCoords.x, localCoords.y);
 		Building* building = EntityManager::instance()->isBuilding(point);
+
+		// Toggle showing lines
 		if (building != nullptr && building->getType() == Toolbox::BuildingType::OFFENSIVE)
 			building->toggleIndices();
+		PathPlanner::instance()->generatePath(sf::Vector2f((float)event.mouseButton.x, (float)event.mouseButton.y));
 	}
-	
 }
 
 StateBase::StateID RunGame::getStateID()

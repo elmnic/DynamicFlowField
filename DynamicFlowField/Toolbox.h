@@ -38,8 +38,11 @@ public:
 
 	static std::string floatToString(float f);
 
-	static sf::Vector2i globalToIndexCoords(sf::Vector2i& pos);
-	static sf::Vector2i localToGlobalCoords(sf::Vector2i& localPos);
+	static sf::Vector2i globalToIndexCoords(sf::Vector2f& pos);
+	static sf::Vector2f localToGlobalCoords(sf::Vector2i& localPos);
+
+	// Returns middle of block using global coords
+	static sf::Vector2f getMiddleOfBlock(sf::Vector2f& globalPos);
 
 	static int pointInPoly(int nrOfVerts, std::vector<float>& vertX, std::vector<float>& vertY, float testX, float testY);
 

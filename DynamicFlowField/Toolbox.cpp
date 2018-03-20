@@ -138,7 +138,7 @@ std::string Toolbox::floatToString(float f)
 }
 
 // Convert mouse position to a coordinate on the 2D grid
-sf::Vector2i Toolbox::globalToIndexCoords(sf::Vector2i& pos)
+sf::Vector2i Toolbox::globalToIndexCoords(sf::Vector2f& pos)
 {
 	float xTileSize = getMapBlockSize().x;
 	float yTileSize = getMapBlockSize().y;
@@ -150,13 +150,19 @@ sf::Vector2i Toolbox::globalToIndexCoords(sf::Vector2i& pos)
 	return mouseIndex;
 }
 
-sf::Vector2i Toolbox::localToGlobalCoords(sf::Vector2i& localPos)
+sf::Vector2f Toolbox::localToGlobalCoords(sf::Vector2i& localPos)
 {
-	int globalX = localPos.x * getMapBlockSize().x;
-	int globalY = localPos.y * getMapBlockSize().y;
+	float globalX = localPos.x * getMapBlockSize().x;
+	float globalY = localPos.y * getMapBlockSize().y;
 
-	sf::Vector2i global(globalX, globalY);
+	sf::Vector2f global(globalX, globalY);
 	return global;
+}
+
+sf::Vector2f Toolbox::getMiddleOfBlock(sf::Vector2f & globalPos)
+{
+	sf::Vector2f middle(globalPos.x + getMapBlockSize().x / 2, globalPos.y + getMapBlockSize().y / 2);
+	return middle;
 }
 
 int Toolbox::pointInPoly(int nrOfVerts, std::vector<float>& vertX, std::vector<float>& vertY, float testX, float testY)

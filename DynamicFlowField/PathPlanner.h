@@ -9,14 +9,14 @@
 
 struct WeightNode 
 {
-	WeightNode(sf::Vector2i position, int weight, WeightNode* parent = nullptr) {
+	WeightNode(sf::Vector2i position, float weight, WeightNode* parent = nullptr) {
 		this->position = position;
 		this->weight = weight;
 		this->parent = parent;
 	}
 
 	bool visited = false;
-	int weight = 0;
+	float weight = 0.f;
 	sf::Vector2i position;
 	WeightNode* parent;
 	std::vector<WeightNode*> children;
@@ -32,11 +32,11 @@ public:
 	static PathPlanner* instance();
 	~PathPlanner();
 
-	FlowGenerator::FlowField generatePath(sf::Vector2i startPos);
+	FlowGenerator::FlowField generatePath(sf::Vector2f startPos);
 	void render();
 	void clear();
 
-	// Breadth-first-search from startPos
+	// Breadth-first-search from startPos #
 		// Create a field of weights using BFS nodes
 	// Pass this field to FlowGenerator
 	// Return flow field to agent
@@ -47,9 +47,13 @@ private:
 	void expandChildren(WeightNode* current);
 	void recreatePath(Queue& cameFrom, WeightNode* node);
 
+	void renderToTexture();
+
 	Queue mNodeQueue;
 	LookupTable mNodeLookup;
 	int mIterations;
 	Queue mShortestPath;
+
+	sf::RenderTexture mShortestPathTexture;
 };
 

@@ -1,6 +1,8 @@
 #pragma once
 #include "Entity.h"
 
+#include "LineRenderer.h"
+
 class Building :
 	public Entity
 {
@@ -18,11 +20,15 @@ public:
 	int getSize() { return mSize; }
 	Toolbox::BuildingType getType() { return mType; }
 	sf::Vector2i& getPosition() { return mPosition; }
+	sf::Vector2f getMiddleOfBuildingGlobal();
 
 	// Polygon for confirming flow direction
 	void addPolyPoint(sf::Vector2i point);
+	void sortPolyPoints();
 	void clearPolyPoint();
 	std::vector<sf::Vector2i>& getPolyPoints() { return mIndices; }
+
+
 
 	void toggleIndices();
 private:

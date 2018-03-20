@@ -87,6 +87,9 @@
     <ClCompile Include="TextRenderer.cpp">
       <Filter>Source Files\Utility</Filter>
     </ClCompile>
+    <ClCompile Include="LineRenderer.cpp">
+      <Filter>Source Files\Utility</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">
@@ -135,6 +138,9 @@
       <Filter>Header Files\Entity</Filter>
     </ClInclude>
     <ClInclude Include="TextRenderer.h">
+      <Filter>Header Files\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="LineRenderer.h">
       <Filter>Header Files\Utility</Filter>
     </ClInclude>
   </ItemGroup>

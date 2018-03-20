@@ -1,4 +1,5 @@
 #include "Agent.h"
+#include "PathPlanner.h"
 #include <iostream>
 
 
@@ -16,6 +17,9 @@ Agent::Agent(sf::Vector2i pos)
 	// Reset sprite size to fit block
 	mSprite.scale(sf::Vector2f(1 / scaleX, 1 / scaleY));
 	mSprite.setPosition(sf::Vector2f((float)pos.x * sizeX, (float)pos.y * sizeY));
+
+	//Generate path
+	updatePath();
 }
 
 
@@ -37,4 +41,10 @@ void Agent::render(sf::RenderWindow& window)
 void Agent::kill()
 {
 	mAlive = false;
+}
+
+// Called when spawning and when current target is lost
+void Agent::updatePath()
+{
+	PathPlanner::instance()->generatePath(mSprite.getPosition());
 }

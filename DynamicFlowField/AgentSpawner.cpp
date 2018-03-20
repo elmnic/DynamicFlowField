@@ -30,6 +30,7 @@ void AgentSpawner::update()
 
 		// Convert mTimeElapsed to string and send it to TextRenderer
 		mText->setString("Time elapsed: " + Toolbox::floatToString(mTimeElapsed));
+
 		// Terminate spawning if needed
 		if (Toolbox::getTerminateSimulation())
 		{
