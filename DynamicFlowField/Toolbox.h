@@ -3,6 +3,8 @@
 #include <SFML\Graphics.hpp>
 #include <atomic>
 #include <sstream>
+#include <cmath>
+#include <iostream>
 
 struct Toolbox
 {
@@ -45,5 +47,12 @@ public:
 	static sf::Vector2f getMiddleOfBlock(sf::Vector2f& globalPos);
 
 	static int pointInPoly(int nrOfVerts, std::vector<float>& vertX, std::vector<float>& vertY, float testX, float testY);
+
+	static bool getDynamicOrStatic();
+	// Will toggle between dynamic and static flow field
+	static void SetDynamicOrStatic();
+
+	static float getMagnitude(sf::Vector2f& vec);
+	static float getDistance(sf::Vector2f& a, sf::Vector2f& b);
 
 };

@@ -8,7 +8,7 @@ class FlowGenerator
 public:
 	// 2D vector with directions
 	typedef std::vector<std::vector<sf::Vector2f>> FlowField;
-	typedef std::vector<std::vector<int>> WeightMap;
+	typedef std::vector<std::vector<float>> WeightMap;
 	
 	static FlowGenerator* instance();
 	~FlowGenerator();
@@ -25,7 +25,12 @@ public:
 private:
 	FlowGenerator();
 
-	WeightMap mAccumulatedWeights;
+	WeightMap& generateWeightMap(sf::Vector2i startPos);
+
+	WeightMap mSharedWeightMap;
 	FlowField mSharedFlowField;
+
+	WeightMap mPersonalWeightMap;
+	FlowField mPersonalFlowField;
 };
 

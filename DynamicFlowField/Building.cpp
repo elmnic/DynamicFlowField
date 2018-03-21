@@ -59,6 +59,26 @@ void Building::kill()
 	mAlive = false;
 }
 
+sf::Vector2i Building::getPositionClosest(sf::Vector2f& globalTarget)
+{
+	// Iterate through all building blocks and check which one is the closest
+	sf::Vector2f globalPos = Toolbox::localToGlobalCoords(mPosition);
+	sf::Vector2f start     = Toolbox::getMiddleOfBlock(globalPos);
+	sf::Vector2f blockSize = Toolbox::getMapBlockSize();
+	sf::Vector2f vectorReturn(mPosition);
+	for (int i = 0; i < mSize; i++)
+	{
+		for (int j = 0; j < mSize; j++)
+		{
+			sf::Vector2f bGlobal(start.x + blockSize.x * i, start.y + blockSize.y * j);
+			// If other distance is shorter than current shortest, update shortest
+			if (Toolbox::getDistance(globalTarget, bGlobal) < Toolbox::getDistance(globalTarget, vectorReturn))
+				vectorReturn = bGlobal;
+		}
+	}
+	return Toolbox::globalToIndexCoords(vectorReturn);
+}
+
 sf::Vector2f Building::getMiddleOfBuildingGlobal()
 {
 	float xBlockSize = Toolbox::getMapBlockSize().x;

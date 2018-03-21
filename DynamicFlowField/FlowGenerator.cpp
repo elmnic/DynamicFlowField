@@ -1,5 +1,5 @@
 #include "FlowGenerator.h"
-
+#include <iostream>
 
 
 FlowGenerator* FlowGenerator::instance()
@@ -10,6 +10,13 @@ FlowGenerator* FlowGenerator::instance()
 
 FlowGenerator::FlowGenerator()
 {
+}
+
+FlowGenerator::WeightMap & FlowGenerator::generateWeightMap(sf::Vector2i startPos)
+{
+	// TODO: insert return statement here
+	return mPersonalWeightMap;
+
 }
 
 
@@ -31,6 +38,7 @@ FlowGenerator::FlowField & FlowGenerator::createFlowFieldDynamic(WeightMap weigh
 {
 
 	// TODO: generate flow field
+
 
 	return mSharedFlowField;
 }

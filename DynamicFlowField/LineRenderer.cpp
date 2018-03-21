@@ -23,6 +23,7 @@ void LineRenderer::renderLine(sf::Vector2f start, sf::Vector2f end)
 	line[1].position = end;
 	
 	line[0].color = sf::Color::Red;
+	line[1].color = sf::Color::Blue;
 
 	Toolbox::getWindow().draw(line);
 }

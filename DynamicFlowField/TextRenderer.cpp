@@ -27,7 +27,7 @@ void TextRenderer::render()
 		mTexts[i]->setFillColor(sf::Color::Black);
 		mTexts[i]->setOutlineColor(sf::Color::White);
 		mTexts[i]->setOutlineThickness(1.f);
-		Toolbox::instance()->getWindow().draw(*mTexts[i]);
+		Toolbox::getWindow().draw(*mTexts[i]);
 	}
 }
 

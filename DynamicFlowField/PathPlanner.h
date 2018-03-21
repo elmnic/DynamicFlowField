@@ -15,10 +15,10 @@ struct WeightNode
 		this->parent = parent;
 	}
 
-	bool visited = false;
-	float weight = 0.f;
-	sf::Vector2i position;
-	WeightNode* parent;
+	bool                     visited = false;
+	float                    weight;
+	sf::Vector2i             position;
+	WeightNode*              parent;
 	std::vector<WeightNode*> children;
 };
 
@@ -37,7 +37,7 @@ public:
 	void clear();
 
 	// Breadth-first-search from startPos #
-		// Create a field of weights using BFS nodes
+		// Create a field of weights using BFS nodes #
 	// Pass this field to FlowGenerator
 	// Return flow field to agent
 
@@ -46,14 +46,17 @@ private:
 
 	void expandChildren(WeightNode* current);
 	void recreatePath(Queue& cameFrom, WeightNode* node);
-
+	FlowGenerator::WeightMap& generateWeightMap(sf::Vector2i& startPos, sf::Vector2i& targetPos);
 	void renderToTexture();
+	void clearNodes();
 
-	Queue mNodeQueue;
-	LookupTable mNodeLookup;
-	int mIterations;
-	Queue mShortestPath;
+	Queue                    mNodeQueue;
+	LookupTable              mNodeLookup;
+	int                      mIterations;
+	Queue                    mShortestPath;
+	FlowGenerator::WeightMap mWeightMap;
+	sf::RenderTexture        mShortestPathTexture;
+	sf::RenderTexture        mWeightTexture;
 
-	sf::RenderTexture mShortestPathTexture;
 };
 

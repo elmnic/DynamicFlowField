@@ -20,6 +20,7 @@ static std::string mTextureFileAgent = "resources/gubbe.png";
 static std::string mTextureFileConfirmed = "resources/confirmed.png";
 
 static std::atomic<bool> mTerminateSimulation = false;
+static std::atomic<bool> mDynamicOrStatic = true; // True = dynamic, false = static
 
 Toolbox* Toolbox::instance()
 {
@@ -143,10 +144,10 @@ sf::Vector2i Toolbox::globalToIndexCoords(sf::Vector2f& pos)
 	float xTileSize = getMapBlockSize().x;
 	float yTileSize = getMapBlockSize().y;
 
-	int mouseX = (int)(pos.x / xTileSize);
-	int mouseY = (int)(pos.y / yTileSize);
+	int localX = (int)(pos.x / xTileSize);
+	int localY = (int)(pos.y / yTileSize);
 
-	sf::Vector2i mouseIndex(mouseX, mouseY);
+	sf::Vector2i mouseIndex(localX, localY);
 	return mouseIndex;
 }
 
@@ -175,3 +176,25 @@ int Toolbox::pointInPoly(int nrOfVerts, std::vector<float>& vertX, std::vector<f
 	}
 	return c;
 }
+
+bool Toolbox::getDynamicOrStatic()
+{
+	return mDynamicOrStatic;
+}
+
+void Toolbox::SetDynamicOrStatic()
+{
+	mDynamicOrStatic = !mDynamicOrStatic;
+}
+
+float Toolbox::getMagnitude(sf::Vector2f& vec)
+{
+	return std::sqrt(std::pow(vec.x, 2) + std::pow(vec.y, 2));
+}
+
+float Toolbox::getDistance(sf::Vector2f& a, sf::Vector2f& b)
+{
+	sf::Vector2f between(a - b);
+	return getMagnitude(between);
+}
+
