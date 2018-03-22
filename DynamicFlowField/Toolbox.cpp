@@ -21,6 +21,8 @@ static std::string mTextureFileConfirmed = "resources/confirmed.png";
 
 static std::atomic<bool> mTerminateSimulation = false;
 static std::atomic<bool> mDynamicOrStatic = true; // True = dynamic, false = static
+static std::atomic<bool> mRenderWeights = true;
+static std::atomic<bool> mRenderClosestPoints = true;
 
 Toolbox* Toolbox::instance()
 {
@@ -138,6 +140,11 @@ std::string Toolbox::floatToString(float f)
 	return stringTemp.str();
 }
 
+std::string Toolbox::boolToString(bool value)
+{
+	return value ? "true" : "false";
+}
+
 // Convert mouse position to a coordinate on the 2D grid
 sf::Vector2i Toolbox::globalToIndexCoords(sf::Vector2f& pos)
 {
@@ -182,19 +189,48 @@ bool Toolbox::getDynamicOrStatic()
 	return mDynamicOrStatic;
 }
 
-void Toolbox::SetDynamicOrStatic()
+void Toolbox::ToggleDynamicOrStatic()
 {
 	mDynamicOrStatic = !mDynamicOrStatic;
 }
 
 float Toolbox::getMagnitude(sf::Vector2f& vec)
 {
-	return std::sqrt(std::pow(vec.x, 2) + std::pow(vec.y, 2));
+	return std::sqrt(vec.x * vec.x + vec.y * vec.y);
 }
 
 float Toolbox::getDistance(sf::Vector2f& a, sf::Vector2f& b)
 {
 	sf::Vector2f between(a - b);
 	return getMagnitude(between);
+}
+
+sf::Vector2f Toolbox::normalize(sf::Vector2f & vec)
+{
+	sf::Vector2f normalized(0, 0);
+	float magnitude = getMagnitude(vec);
+	normalized.x = vec.x / magnitude;
+	normalized.y = vec.y / magnitude;
+	return normalized;
+}
+
+bool Toolbox::getRenderWeights()
+{
+	return mRenderWeights;
+}
+
+void Toolbox::toggleRenderWeights()
+{
+	mRenderWeights = !mRenderWeights;
+}
+
+bool Toolbox::getRenderClosestPoints()
+{
+	return mRenderClosestPoints;
+}
+
+void Toolbox::toggleRenderClosestPoints()
+{
+	mRenderClosestPoints = !mRenderClosestPoints;
 }
 

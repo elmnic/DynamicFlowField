@@ -20,4 +20,6 @@ private:
 
 	sf::RenderWindow* mWindow;
 	sf::Text* mStateText;
+	sf::Text* mRenderWeightText;
+	sf::Text* mRenderClosestPointText;
 };

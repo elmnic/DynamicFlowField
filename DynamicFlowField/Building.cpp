@@ -52,6 +52,9 @@ void Building::render(sf::RenderWindow& window)
 			LineRenderer::instance()->renderLine(startPoint, Toolbox::getMiddleOfBlock(globalCoords));
 		}
 	}
+	if (Toolbox::getRenderClosestPoints())
+		for (int i = 0; i < mClosestPointTargets.size(); i+=2)
+			LineRenderer::instance()->renderLine(mClosestPointTargets[i], mClosestPointTargets[i + 1]);
 }
 
 void Building::kill()
@@ -65,6 +68,7 @@ sf::Vector2i Building::getPositionClosest(sf::Vector2f& globalTarget)
 	sf::Vector2f globalPos = Toolbox::localToGlobalCoords(mPosition);
 	sf::Vector2f start     = Toolbox::getMiddleOfBlock(globalPos);
 	sf::Vector2f blockSize = Toolbox::getMapBlockSize();
+	sf::Vector2f targetMid = Toolbox::getMiddleOfBlock(globalTarget);
 	sf::Vector2f vectorReturn(mPosition);
 	for (int i = 0; i < mSize; i++)
 	{
@@ -72,10 +76,12 @@ sf::Vector2i Building::getPositionClosest(sf::Vector2f& globalTarget)
 		{
 			sf::Vector2f bGlobal(start.x + blockSize.x * i, start.y + blockSize.y * j);
 			// If other distance is shorter than current shortest, update shortest
-			if (Toolbox::getDistance(globalTarget, bGlobal) < Toolbox::getDistance(globalTarget, vectorReturn))
+			if (Toolbox::getDistance(targetMid, bGlobal) <= Toolbox::getDistance(targetMid, vectorReturn))
 				vectorReturn = bGlobal;
 		}
 	}
+	mClosestPointTargets.push_back(targetMid);
+	mClosestPointTargets.push_back(vectorReturn);
 	return Toolbox::globalToIndexCoords(vectorReturn);
 }
 

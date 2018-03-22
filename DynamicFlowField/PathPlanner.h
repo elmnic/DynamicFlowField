@@ -55,6 +55,7 @@ private:
 	int                      mIterations;
 	Queue                    mShortestPath;
 	FlowGenerator::WeightMap mWeightMap;
+	FlowGenerator::FlowField mFlowField;
 	sf::RenderTexture        mShortestPathTexture;
 	sf::RenderTexture        mWeightTexture;
 

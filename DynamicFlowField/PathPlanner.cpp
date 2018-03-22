@@ -23,8 +23,12 @@ void PathPlanner::render()
 {
 	sf::Sprite pathSprite(mShortestPathTexture.getTexture());
 	Toolbox::getWindow().draw(pathSprite);
-	sf::Sprite weightSprite(mWeightTexture.getTexture());
-	Toolbox::getWindow().draw(weightSprite);
+	
+	if (Toolbox::getRenderWeights())
+	{
+		sf::Sprite weightSprite(mWeightTexture.getTexture());
+		Toolbox::getWindow().draw(weightSprite);
+	}
 }
 
 void PathPlanner::clear()
@@ -52,7 +56,7 @@ FlowGenerator::FlowField PathPlanner::generatePath(sf::Vector2f startPos)
 	if (testFor != nullptr && testFor->getType() == Toolbox::BuildingType::POLYPOINT)
 	{
 		std::cout << "Start pos was already confirmed\n";
-		return FlowGenerator::FlowField();
+		return mFlowField;
 	}
 
 	// Check if start was on a building. End if true
@@ -98,19 +102,18 @@ FlowGenerator::FlowField PathPlanner::generatePath(sf::Vector2f startPos)
 			// If target is on an offensive building
 			if (target != nullptr && target->getType() == Toolbox::BuildingType::OFFENSIVE)
 			{
-				//TODO: Use FlowGenerator to create flow field from building position. Preferably avoiding the other tiles of the building
 				foundTarget = true;
+
 				// Add point to building to define polygon
 				target->addPolyPoint(localCoordIndex);
 				EntityManager::instance()->createConfirmed(localCoordIndex);
-				recreatePath(mShortestPath, child); // Probably won't need this later
 
 				// Find nearest point on building and generate weights from there
 				sf::Vector2i closestPointOnBuilding = target->getPositionClosest(startPos);
 				generateWeightMap(closestPointOnBuilding, localCoordIndex);
 
-				// ########### Generate flow field using weight map
-				FlowGenerator::instance()->createFlowFieldDynamic(mWeightMap);
+				// Generate flow field using weight map
+				mFlowField = FlowGenerator::instance()->createFlowFieldDynamic(mWeightMap);
 
 				renderToTexture();
 				break;
@@ -125,11 +128,17 @@ FlowGenerator::FlowField PathPlanner::generatePath(sf::Vector2f startPos)
 		}
 	}
 
-	return FlowGenerator::FlowField();
+	return mFlowField;
 }
 
 void PathPlanner::expandChildren(WeightNode* current)
 {
+	// Iterate through all directions 
+	/*
+		-1,-1   0,-1   1,-1
+		-1, 0   0, 0   1, 0
+		-1, 1   0, 1   1, 1
+	*/
 	for (int i = -1; i <= 1; i++)
 	{
 		for (int j = -1; j <=1; j++)
@@ -137,11 +146,12 @@ void PathPlanner::expandChildren(WeightNode* current)
 			// Skip itself
 			if (i == 0 && j == 0)
 				continue;
-			// Skip nodes outside horizontally
-			if (current->position.x + i < 0 || current->position.x + i > Toolbox::getMapDimensions().x - 1)
+			// Skip diagonal
+			if (i != 0 && j != 0)
 				continue;
-			// Skip nodes outside vertically
-			if (current->position.y + j < 0 || current->position.y + j > Toolbox::getMapDimensions().y - 1)
+			// Skip nodes outside map horizontally/vertically
+			if (current->position.x + j < 0 || current->position.x + j > Toolbox::getMapDimensions().x - 1 ||
+				current->position.y + i < 0 || current->position.y + i > Toolbox::getMapDimensions().y - 1)
 				continue;
 
 			// Create temp point
@@ -149,23 +159,23 @@ void PathPlanner::expandChildren(WeightNode* current)
 			LookupTable::iterator search = mNodeLookup.find(p);
 
 			// Weight depending on diagonal or horizontal/vertical direction
-			float weight = 1.f;
-			if (i != 0 && j != 0)
-				weight = 1.5f;
+			float weight = 1.0f;
+			/*if (i != 0 && j != 0)
+				weight = 1.4f;*/
 			
-			if (search != mNodeLookup.end()) // If point exists
+			// If point exists
+			if (search != mNodeLookup.end()) 
 			{
-				// If new node has a shorter path and if it is already visited, continue
-				WeightNode* node = search->second;
-				if (node->weight <= current->weight + weight && node->visited)
-					continue;
-				else
+				// If new node already has a shorter path and if it has already been visited, continue
+				WeightNode* preExistingNode = search->second;
+				if (preExistingNode->weight > current->weight + weight)
 				{
 					// Current path is shorter. Update weight and parent.
-					node->weight = current->weight + weight;
-					node->parent = current;
+					preExistingNode->weight = current->weight + weight;
+					preExistingNode->parent = current;
 				}
 			}
+			// If point doesn't already exist
 			else
 			{
 				// Create new node and add to map and children queue
@@ -191,9 +201,9 @@ FlowGenerator::WeightMap & PathPlanner::generateWeightMap(sf::Vector2i & startPo
 {
 	// Initialize weight map
 	mWeightMap.clear();
-	mWeightMap.resize(Toolbox::getMapDimensions().y, std::vector<float>(Toolbox::getMapDimensions().x, -1.0f));
+	//mWeightMap.resize(Toolbox::getMapDimensions().y, std::vector<float>(Toolbox::getMapDimensions().x, -1.0f));
 	clearNodes();
-	// Do the same as GeneratePath pretty much.
+	// Do the same as GeneratePath pretty much, but in the opposite direction.
 
 	// Create start node
 	EntityManager::Point pStart(startPos.x, startPos.y);
@@ -213,7 +223,7 @@ FlowGenerator::WeightMap & PathPlanner::generateWeightMap(sf::Vector2i & startPo
 		// Counter if needed
 		mIterations++;
 
-		// Retrieve front of queue
+		// Retrieve front node
 		WeightNode* current = mNodeQueue.front();
 		mNodeQueue.pop_front();
 
@@ -224,10 +234,11 @@ FlowGenerator::WeightMap & PathPlanner::generateWeightMap(sf::Vector2i & startPo
 		for (auto child : current->children)
 		{
 			// Add weight to map
-			mWeightMap[child->position.y][child->position.x] = child->weight;
+			FlowGenerator::Point point(child->position.x, child->position.y);
+			// Skip if point doesn't exist
+			mWeightMap[point] = child->weight;
 
 			// Check for building
-			EntityManager::Point point(child->position.x, child->position.y);
 			Building* target = EntityManager::instance()->isBuilding(point);
 
 			// Skip buildings
@@ -242,7 +253,7 @@ FlowGenerator::WeightMap & PathPlanner::generateWeightMap(sf::Vector2i & startPo
 				break;
 			}
 
-			// Add unvisited child to back of queue
+			// Add unvisited child to queue
 			if (!child->visited)
 			{
 				mNodeQueue.push_back(child);
@@ -272,9 +283,23 @@ void PathPlanner::renderToTexture()
 	// Create text and position it in the middle of the block
 	sf::Text text;
 	text.setFont(Toolbox::getFont());
-	text.setCharacterSize(10);
+	text.setCharacterSize(30);
 	mWeightTexture.clear(sf::Color(0, 0, 0, 0));
-	for (size_t i = 0; i < mWeightMap.size(); i++)
+
+	for (auto weightPoint : mWeightMap)
+	{
+		text.setFillColor(sf::Color::Black);
+		text.setString(Toolbox::floatToString(weightPoint.second));
+		// The "first" is a pair of ints
+		sf::Vector2i local(weightPoint.first.first, weightPoint.first.second);
+		sf::Vector2f global = Toolbox::localToGlobalCoords(local);
+		text.setPosition(Toolbox::getMiddleOfBlock(global));
+		text.move(-sf::Vector2f(text.getLocalBounds().width / 2.f, text.getLocalBounds().height / 2.f));
+		mWeightTexture.draw(text);
+
+	}
+
+	/*for (size_t i = 0; i < mWeightMap.size(); i++)
 	{
 		for (size_t j = 0; j < mWeightMap[i].size(); j++)
 		{
@@ -289,7 +314,7 @@ void PathPlanner::renderToTexture()
 				mWeightTexture.draw(text);
 			}
 		}
-	}
+	}*/
 	mWeightTexture.display();
 
 }
@@ -297,7 +322,7 @@ void PathPlanner::renderToTexture()
 void PathPlanner::clearNodes()
 {
 	// Clear lookup and queue after finishing
-		for (std::map<EntityManager::Point, WeightNode*>::iterator it = mNodeLookup.begin(), next_it = mNodeLookup.begin(); it != mNodeLookup.end(); it = next_it)
+		for (LookupTable::iterator it = mNodeLookup.begin(), next_it = mNodeLookup.begin(); it != mNodeLookup.end(); it = next_it)
 		{
 			next_it = it; ++next_it;
 			mNodeLookup.erase(it);

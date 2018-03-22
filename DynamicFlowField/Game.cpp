@@ -4,7 +4,7 @@ static int MAPSIZE = 30;
 
 Game::Game()
 {
-	mWindow.create(sf::VideoMode(1000, 1000), "Dynamic Flow Field", sf::Style::Close);
+	mWindow.create(sf::VideoMode(1900, 1900), "Dynamic Flow Field", sf::Style::Close);
 	mWindow.setFramerateLimit(120);
 	Toolbox::setWindow(&mWindow);
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Entity.h"
+#include "FlowGenerator.h"
 
 class Agent :
 	public Entity
@@ -22,7 +23,8 @@ private:
 	bool mAlive = true;
 
 	sf::Vector2f mPosition;
-	sf::Vector2f mVelocity = sf::Vector2f(40.f, 40.f);
+	float mVelocity = 25.f;
 	sf::Sprite mSprite;
+	FlowGenerator::FlowField mFlowField;
 };
 

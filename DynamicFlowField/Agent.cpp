@@ -30,7 +30,12 @@ Agent::~Agent()
 void Agent::update()
 {
 	// Retrieve velocity from flow field instead
-	mSprite.move(mVelocity * Toolbox::getDeltaTime().asSeconds());
+	sf::Vector2f direction;
+	sf::Vector2f globalMid = mSprite.getPosition();
+	globalMid = Toolbox::getMiddleOfBlock(globalMid);
+	sf::Vector2i local = Toolbox::globalToIndexCoords(globalMid);
+	FlowGenerator::Point point(local.x, local.y);
+	mSprite.move(mFlowField[point] * mVelocity * Toolbox::getDeltaTime().asSeconds());
 }
 
 void Agent::render(sf::RenderWindow& window)
@@ -46,5 +51,5 @@ void Agent::kill()
 // Called when spawning and when current target is lost
 void Agent::updatePath()
 {
-	PathPlanner::instance()->generatePath(mSprite.getPosition());
+	mFlowField = PathPlanner::instance()->generatePath(mSprite.getPosition());
 }

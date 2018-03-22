@@ -47,6 +47,9 @@ private:
 	// Index in polygon containing confirmed closest points leading to this building
 	std::vector<sf::Vector2i> mIndices;
 
+	std::vector<sf::Vector2f> mClosestPointTargets;
+
+
 	// Vector containing agent search points acting like corners in a polygon
 	// Agent positions become confirmed points 
 	// Need at least two agents to create a field of confirmed points

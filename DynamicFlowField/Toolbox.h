@@ -39,6 +39,7 @@ public:
 	static sf::Texture& getTexture(TextureCode code);
 
 	static std::string floatToString(float f);
+	static std::string boolToString(bool value);
 
 	static sf::Vector2i globalToIndexCoords(sf::Vector2f& pos);
 	static sf::Vector2f localToGlobalCoords(sf::Vector2i& localPos);
@@ -49,10 +50,15 @@ public:
 	static int pointInPoly(int nrOfVerts, std::vector<float>& vertX, std::vector<float>& vertY, float testX, float testY);
 
 	static bool getDynamicOrStatic();
-	// Will toggle between dynamic and static flow field
-	static void SetDynamicOrStatic();
+	static void ToggleDynamicOrStatic();
 
 	static float getMagnitude(sf::Vector2f& vec);
 	static float getDistance(sf::Vector2f& a, sf::Vector2f& b);
+	static sf::Vector2f normalize(sf::Vector2f& vec);
 
+	static bool getRenderWeights();
+	static void toggleRenderWeights();
+
+	static bool getRenderClosestPoints();
+	static void toggleRenderClosestPoints();
 };

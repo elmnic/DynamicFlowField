@@ -128,22 +128,29 @@ void EntityManager::render(sf::RenderWindow & window)
 
 void EntityManager::exit()
 {
+	clearConfirmed();
+
 	for (auto it : mBuildings)
 		delete it;
 
-	for (auto it : mAgents)
-		delete it;
+	clearAgents();
 
-	for (std::map<Point, Building*>::iterator it = mBuildingMap.begin(), next_it = mBuildingMap.begin(); it != mBuildingMap.end(); it = next_it)
+	for (BuildingMap::iterator it = mBuildingMap.begin(), next_it = mBuildingMap.begin(); it != mBuildingMap.end(); it = next_it)
 	{
 		next_it = it; ++next_it;
 		mBuildingMap.erase(it);
 	}
 
 	mBuildings.clear();
-	mAgents.clear();
 	mBuildingMap.clear();
 
+}
+
+void EntityManager::clearAgents()
+{
+	for (auto it : mAgents)
+		delete it;
+	mAgents.clear();
 	AgentSpawner::instance()->clear();
 }
 

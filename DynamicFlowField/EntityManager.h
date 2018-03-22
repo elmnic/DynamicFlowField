@@ -29,6 +29,7 @@ public:
 	void render(sf::RenderWindow &window);
 
 	void exit();
+	void clearAgents();
 
 	// Removes stored points from buildings and the Confirmed-buildings
 	void clearConfirmed();
