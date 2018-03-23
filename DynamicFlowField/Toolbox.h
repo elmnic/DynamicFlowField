@@ -61,4 +61,7 @@ public:
 
 	static bool getRenderClosestPoints();
 	static void toggleRenderClosestPoints();
+
+	static bool getRenderFlow();
+	static void toggleRenderFlow();
 };

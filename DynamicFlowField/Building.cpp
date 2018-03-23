@@ -69,7 +69,7 @@ sf::Vector2i Building::getPositionClosest(sf::Vector2f& globalTarget)
 	sf::Vector2f start     = Toolbox::getMiddleOfBlock(globalPos);
 	sf::Vector2f blockSize = Toolbox::getMapBlockSize();
 	sf::Vector2f targetMid = Toolbox::getMiddleOfBlock(globalTarget);
-	sf::Vector2f vectorReturn(mPosition);
+	sf::Vector2f vectorReturn(globalPos);
 	for (int i = 0; i < mSize; i++)
 	{
 		for (int j = 0; j < mSize; j++)
@@ -127,6 +127,8 @@ void Building::addPolyPoint(sf::Vector2i point)
 
 		// Remove old points that are now inside polygon
 		sortPolyPoints();
+
+
 		
 	}
 }
@@ -181,6 +183,11 @@ void Building::toggleIndices()
 {
 	std::cout << "Nr of indices: " << mIndices.size() << "\n";
 	mRenderIndices = !mRenderIndices;
+}
+
+void Building::renderToTexture()
+{
+
 }
 
 Toolbox::TextureCode Building::buildingToTexture(Toolbox::BuildingType type)

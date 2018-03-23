@@ -1,4 +1,5 @@
 #include "FlowGenerator.h"
+#include "EntityManager.h"
 #include <iostream>
 
 
@@ -29,8 +30,11 @@ FlowGenerator::~FlowGenerator()
 
 void FlowGenerator::render()
 {
-	sf::Sprite flow(mFlowTexture.getTexture());
-	Toolbox::getWindow().draw(flow);
+	if (Toolbox::getRenderFlow())
+	{
+		sf::Sprite flow(mFlowTexture.getTexture());
+		Toolbox::getWindow().draw(flow);
+	}
 }
 
 void FlowGenerator::clear()
@@ -57,37 +61,71 @@ FlowGenerator::FlowField & FlowGenerator::createFlowFieldDynamic(WeightMap& weig
 	// Iterate through all weights
 	for (auto node : weights)
 	{
+		bool nearbyWall = false;
+
 		// Create easier to read vector using the pair of ints in map
 		int col = node.first.first;  // X
 		int row = node.first.second; // Y
 		sf::Vector2i nodeLocal(col, row);
-		sf::Vector2i lowestWeight(row, col);
+		FlowGenerator::Point currentLowestPoint(nodeLocal.x, nodeLocal.y);
+
+		// Find a valid default point
+		for (int vertical = -1; vertical <= 1; vertical++)
+		{
+			for (int horizontal = -1; horizontal <= 1; horizontal++)
+			{
+				FlowGenerator::Point test(col + horizontal, row + vertical);
+				Building* building = EntityManager::instance()->isBuilding(test);
+				if (building != nullptr && building->getType() != Toolbox::BuildingType::POLYPOINT)
+					nearbyWall = true;
+
+				// Check only horizontal/vertical if there is a wall nearby
+				if (nearbyWall)
+				{
+					if (vertical == 0 || horizontal == 0)
+					{
+						if (weights.find(test) != weights.end())
+						{
+							currentLowestPoint = test;
+						}
+					}
+				}
+				else 
+				{
+					if (weights.find(test) != weights.end())
+					{
+						currentLowestPoint = test;
+					}
+				}
+			}
+		}
 
 		// Iterate through all directions around a certain weight to find the cheapest point
 		for (int vertical = -1; vertical <= 1; vertical++)
 		{
-			for (int horizontal = -1; horizontal <= -1; horizontal++)
+			for (int horizontal = -1; horizontal <= 1; horizontal++)
 			{
 				// Skip itself
 				if (vertical == 0 && horizontal == 0)
 					continue;
-
-				// Skip position outside horizontally/vertically
-				if (row + vertical < 0 || row + vertical > Toolbox::getMapDimensions().y - 1 ||
-					col + horizontal < 0 || col + horizontal > Toolbox::getMapDimensions().x - 1)
-					continue;
+				// Skip diagonal if wall is nearby
+				if (nearbyWall)
+					if (vertical != 0 && horizontal != 0)
+						continue;
 
 				// Find the position with the lowest weight
 				FlowGenerator::Point testPoint(col + horizontal, row + vertical);
+
+				// If the point has weight
 				if (weights.find(testPoint) != weights.end())
 				{
-					FlowGenerator::Point lowestWeightPoint(lowestWeight.x, lowestWeight.y);
-					if (weights[testPoint] < weights[lowestWeightPoint])
-						lowestWeight = sf::Vector2i(testPoint.second, testPoint.first);
+					if (weights.find(testPoint)->second <= weights.find(currentLowestPoint)->second)
+						currentLowestPoint = testPoint;
 				}
 			}
 		}
 		// Calculate direction to lowest weight node
+		sf::Vector2i lowestWeight(currentLowestPoint.first, currentLowestPoint.second);
 		sf::Vector2f direction;
 		sf::Vector2f globalOrigin = Toolbox::localToGlobalCoords(nodeLocal);
 		             globalOrigin = Toolbox::getMiddleOfBlock(globalOrigin);
@@ -97,80 +135,36 @@ FlowGenerator::FlowField & FlowGenerator::createFlowFieldDynamic(WeightMap& weig
 		direction = globalA - globalOrigin;
 
 		// Set the direction vector at the correct position
-		mSharedFlowField[node.first] = Toolbox::normalize(direction);
+		sf::Vector2f normalized = Toolbox::normalize(direction);
+		mSharedFlowField[node.first] = normalized;
 	}
 
 	renderToTexture();
 
 	return mSharedFlowField;
-
-	//for (int row = 0; row < weights.size(); row++)
-	//{
-	//	for (int col = 0; col < weights[row].size(); col++)
-	//	{
-
-	//		// Skip uninitialized locations
-	//		if (weights[col][row] < 0.0f)
-	//			continue;
-
-	//		sf::Vector2i localOrigin(row, col);
-	//		sf::Vector2i lowestW1(row, col);
-
-	//		// Iterate through all directions around a certain weight to find the cheapest point
-	//		for (int vertical = -1; vertical <= 1; vertical++)
-	//		{
-	//			for (int horizontal = -1; horizontal <= -1; horizontal++)
-	//			{
-	//				// Skip itself
-	//				if (vertical == 0 && horizontal == 0)
-	//					continue;
-
-	//				// Skip position outside horizontally/vertically
-	//				if (row + vertical < 0 || row + vertical > Toolbox::getMapDimensions().y - 1 ||
-	//					col + horizontal < 0 || col + horizontal > Toolbox::getMapDimensions().x - 1)
-	//					continue;
-
-	//				// Find the position with the lowest weight
-	//				if (weights[col + horizontal][row + vertical] < weights[lowestW1.y][lowestW1.x] && weights[col + horizontal][row + vertical] >= 0.0f)
-	//					lowestW1 = sf::Vector2i(row + vertical, col + horizontal);
-	//			}
-	//		}
-
-	//		// Calculate direction to lowest weight node
-	//		sf::Vector2f direction;
-	//		FlowGenerator::Point point(localOrigin.x, localOrigin.y);
-	//		sf::Vector2f globalOrigin = Toolbox::localToGlobalCoords(localOrigin);
-	//		             globalOrigin = Toolbox::getMiddleOfBlock(globalOrigin);
-	//		sf::Vector2f globalA      = Toolbox::localToGlobalCoords(lowestW1);
-	//		             globalA      = Toolbox::getMiddleOfBlock(globalA);
-
-	//		direction = globalA - globalOrigin;
-
-	//		mSharedFlowField[point] = Toolbox::normalize(direction);
-	//	}
-	//}
-
 }
 
 void FlowGenerator::renderToTexture()
 {
 	mFlowTexture.clear(sf::Color(0, 0, 0, 0));
-	for (FlowGenerator::FlowField::iterator it = mSharedFlowField.begin(); it != mSharedFlowField.end(); it++)
+	if (Toolbox::getRenderFlow())
 	{
-		sf::Vector2i localStart(it->first.first, it->first.second);
-		
-		sf::Vector2f globalStart = Toolbox::localToGlobalCoords(localStart);
-			            globalStart = Toolbox::getMiddleOfBlock(globalStart);
-		sf::Vector2f globalEnd   = globalStart + it->second;
-			            globalEnd   = Toolbox::getMiddleOfBlock(globalEnd);
-		sf::VertexArray line(sf::Lines, 2);
-		line[0].position = globalStart;
-		line[1].position = globalEnd;
+		for (FlowGenerator::FlowField::iterator it = mSharedFlowField.begin(); it != mSharedFlowField.end(); it++)
+		{
+			sf::Vector2i localStart(it->first.first, it->first.second);
 
-		line[0].color = sf::Color::Red;
-		line[1].color = sf::Color::Blue;
+			sf::Vector2f globalStart = Toolbox::localToGlobalCoords(localStart);
+			globalStart = Toolbox::getMiddleOfBlock(globalStart);
+			sf::Vector2f globalEnd = globalStart + it->second * Toolbox::getMapBlockSize().x * 0.5f;
+			sf::VertexArray line(sf::Lines, 2);
+			line[0].position = globalStart;
+			line[1].position = globalEnd;
 
-		mFlowTexture.draw(line);
+			line[0].color = sf::Color::Red;
+			line[1].color = sf::Color::Blue;
+
+			mFlowTexture.draw(line);
+		}
 	}
 	mFlowTexture.display();
 }

@@ -5,6 +5,7 @@
 #include <map>
 #include "Toolbox.h"
 
+
 class FlowGenerator
 {
 public:
@@ -12,7 +13,16 @@ public:
 	typedef std::pair<int, int> Point;
 	typedef std::map<Point, sf::Vector2f> FlowField;
 	typedef std::map<Point, float> WeightMap;
+	typedef std::pair<Point, float> WeightPair;
 	
+	struct CompareSecond
+	{
+		bool operator()(const WeightPair & left, const WeightPair& right) const
+		{
+			return left.second <= right.second;
+		}
+	};
+
 	static FlowGenerator* instance();
 	~FlowGenerator();
 

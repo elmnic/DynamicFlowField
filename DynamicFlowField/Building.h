@@ -31,6 +31,7 @@ public:
 	
 	void toggleIndices();
 private:
+	void renderToTexture();
 
 	// Convert BuildingType enum to TextureCode enum
 	Toolbox::TextureCode buildingToTexture(Toolbox::BuildingType type);

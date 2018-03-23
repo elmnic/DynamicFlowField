@@ -29,13 +29,17 @@ Agent::~Agent()
 
 void Agent::update()
 {
-	// Retrieve velocity from flow field instead
+	// Calculate which block the agent's middle is in
 	sf::Vector2f direction;
-	sf::Vector2f globalMid = mSprite.getPosition();
-	globalMid = Toolbox::getMiddleOfBlock(globalMid);
-	sf::Vector2i local = Toolbox::globalToIndexCoords(globalMid);
-	FlowGenerator::Point point(local.x, local.y);
-	mSprite.move(mFlowField[point] * mVelocity * Toolbox::getDeltaTime().asSeconds());
+	sf::Vector2f globalSpriteMid = mSprite.getPosition();
+	             globalSpriteMid = Toolbox::getMiddleOfBlock(globalSpriteMid);
+	sf::Vector2i localIndex      = Toolbox::globalToIndexCoords(globalSpriteMid);
+	sf::Vector2f globalBlockMid  = Toolbox::localToGlobalCoords(localIndex);
+	FlowGenerator::Point point(localIndex.x, localIndex.y);
+	
+	// Get velocity direction from flow field
+	mVelocity = mFlowField[point];
+	mSprite.move(mVelocity * mSpeed * Toolbox::getDeltaTime().asSeconds());
 }
 
 void Agent::render(sf::RenderWindow& window)

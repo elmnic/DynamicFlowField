@@ -24,9 +24,6 @@ void TextRenderer::render()
 	// Position each text above each other
 	for (size_t i = 0; i < mTexts.size(); i++)
 	{
-		mTexts[i]->setFillColor(sf::Color::Black);
-		mTexts[i]->setOutlineColor(sf::Color::White);
-		mTexts[i]->setOutlineThickness(1.f);
 		Toolbox::getWindow().draw(*mTexts[i]);
 	}
 }
@@ -34,6 +31,10 @@ void TextRenderer::render()
 void TextRenderer::addTextElement(sf::Text* text)
 {
 	// Add text and move it down
+	text->setCharacterSize(35);
+	text->setFillColor(sf::Color::Black);
+	text->setOutlineColor(sf::Color::White);
+	text->setOutlineThickness(1.f);
 	text->move(sf::Vector2f(0.f, (float)(text->getCharacterSize() * mTexts.size())));
 	mTexts.push_back(text);
 }

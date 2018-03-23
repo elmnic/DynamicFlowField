@@ -22,7 +22,8 @@ static std::string mTextureFileConfirmed = "resources/confirmed.png";
 static std::atomic<bool> mTerminateSimulation = false;
 static std::atomic<bool> mDynamicOrStatic = true; // True = dynamic, false = static
 static std::atomic<bool> mRenderWeights = true;
-static std::atomic<bool> mRenderClosestPoints = true;
+static std::atomic<bool> mRenderClosestPoints = false;
+static std::atomic<bool> mRenderFlow = true;
 
 Toolbox* Toolbox::instance()
 {
@@ -207,10 +208,13 @@ float Toolbox::getDistance(sf::Vector2f& a, sf::Vector2f& b)
 
 sf::Vector2f Toolbox::normalize(sf::Vector2f & vec)
 {
-	sf::Vector2f normalized(0, 0);
+	sf::Vector2f normalized(vec);
 	float magnitude = getMagnitude(vec);
-	normalized.x = vec.x / magnitude;
-	normalized.y = vec.y / magnitude;
+	if (magnitude > 0.0f)
+	{
+		normalized.x = vec.x / magnitude;
+		normalized.y = vec.y / magnitude;
+	}
 	return normalized;
 }
 
@@ -232,5 +236,15 @@ bool Toolbox::getRenderClosestPoints()
 void Toolbox::toggleRenderClosestPoints()
 {
 	mRenderClosestPoints = !mRenderClosestPoints;
+}
+
+bool Toolbox::getRenderFlow()
+{
+	return mRenderFlow;
+}
+
+void Toolbox::toggleRenderFlow()
+{
+	mRenderFlow = !mRenderFlow;
 }
 

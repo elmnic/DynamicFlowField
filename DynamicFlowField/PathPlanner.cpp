@@ -20,10 +20,7 @@ PathPlanner::~PathPlanner()
 }
 
 void PathPlanner::render()
-{
-	sf::Sprite pathSprite(mShortestPathTexture.getTexture());
-	Toolbox::getWindow().draw(pathSprite);
-	
+{	
 	if (Toolbox::getRenderWeights())
 	{
 		sf::Sprite weightSprite(mWeightTexture.getTexture());
@@ -99,6 +96,13 @@ FlowGenerator::FlowField PathPlanner::generatePath(sf::Vector2f startPos)
 			if (target != nullptr && target->getType() == Toolbox::BuildingType::DEFENSIVE)
 				continue;
 			
+			// Add unvisited offensive child to back of queue
+			if (!child->visited)
+			{
+				mNodeQueue.push_back(child);
+				child->visited = true;
+			}
+
 			// If target is on an offensive building
 			if (target != nullptr && target->getType() == Toolbox::BuildingType::OFFENSIVE)
 			{
@@ -119,12 +123,6 @@ FlowGenerator::FlowField PathPlanner::generatePath(sf::Vector2f startPos)
 				break;
 			}
 
-			// Add unvisited offensive child to back of queue
-			if (!child->visited)
-			{
-				mNodeQueue.push_back(child);
-				child->visited = true;
-			}
 		}
 	}
 
@@ -139,28 +137,28 @@ void PathPlanner::expandChildren(WeightNode* current)
 		-1, 0   0, 0   1, 0
 		-1, 1   0, 1   1, 1
 	*/
-	for (int i = -1; i <= 1; i++)
+	for (int row = -1; row <= 1; row++)
 	{
-		for (int j = -1; j <=1; j++)
+		for (int col = -1; col <= 1; col++)
 		{
 			// Skip itself
-			if (i == 0 && j == 0)
+			if (row == 0 && col == 0)
 				continue;
 			// Skip diagonal
-			if (i != 0 && j != 0)
+			if (row != 0 && col != 0)
 				continue;
 			// Skip nodes outside map horizontally/vertically
-			if (current->position.x + j < 0 || current->position.x + j > Toolbox::getMapDimensions().x - 1 ||
-				current->position.y + i < 0 || current->position.y + i > Toolbox::getMapDimensions().y - 1)
+			if (current->position.x + row < 0 || current->position.x + row > Toolbox::getMapDimensions().x - 1 ||
+				current->position.y + col < 0 || current->position.y + col > Toolbox::getMapDimensions().y - 1)
 				continue;
 
 			// Create temp point
-			EntityManager::Point p(current->position.x + i, current->position.y + j);
+			EntityManager::Point p(current->position.x + col, current->position.y + row);
 			LookupTable::iterator search = mNodeLookup.find(p);
 
 			// Weight depending on diagonal or horizontal/vertical direction
 			float weight = 1.0f;
-			/*if (i != 0 && j != 0)
+			/*if (row != 0 && col != 0)
 				weight = 1.4f;*/
 			
 			// If point exists
@@ -233,18 +231,24 @@ FlowGenerator::WeightMap & PathPlanner::generateWeightMap(sf::Vector2i & startPo
 		// Check each child for target and if they've been visited
 		for (auto child : current->children)
 		{
-			// Add weight to map
-			FlowGenerator::Point point(child->position.x, child->position.y);
-			// Skip if point doesn't exist
-			mWeightMap[point] = child->weight;
-
 			// Check for building
+			FlowGenerator::Point point(child->position.x, child->position.y);
 			Building* target = EntityManager::instance()->isBuilding(point);
 
 			// Skip buildings
-			if (target != nullptr && target->getType() == Toolbox::BuildingType::DEFENSIVE || 
-				target != nullptr && target->getType() == Toolbox::BuildingType::OFFENSIVE)
+			if ((target != nullptr && target->getType() == Toolbox::BuildingType::DEFENSIVE) || 
+				(target != nullptr && target->getType() == Toolbox::BuildingType::OFFENSIVE))
 				continue;
+
+			// Add weight to map
+			mWeightMap[point] = child->weight;
+			
+			// Add unvisited child to queue
+			if (!child->visited)
+			{
+				mNodeQueue.push_back(child);
+				child->visited = true;
+			}
 
 			// Agent position discovered. Break and return the current weight
 			if (child->position == targetPos)
@@ -253,12 +257,6 @@ FlowGenerator::WeightMap & PathPlanner::generateWeightMap(sf::Vector2i & startPo
 				break;
 			}
 
-			// Add unvisited child to queue
-			if (!child->visited)
-			{
-				mNodeQueue.push_back(child);
-				child->visited = true;
-			}
 		}
 	}
 	clearNodes();
@@ -267,54 +265,27 @@ FlowGenerator::WeightMap & PathPlanner::generateWeightMap(sf::Vector2i & startPo
 }
 
 void PathPlanner::renderToTexture()
-{
-	// Render shortest path visualizer to a separate texture for better performance
-	/*mShortestPathTexture.clear(sf::Color(0, 0, 0, 0));
-	for (auto node : mShortestPath)
-	{
-		sf::CircleShape circle(Toolbox::getMapBlockSize().x / 4);
-		circle.setFillColor(sf::Color::Red);
-		circle.setPosition(node->position.x * Toolbox::getMapBlockSize().x, node->position.y * Toolbox::getMapBlockSize().y);
-		circle.move(sf::Vector2f(circle.getRadius(), circle.getRadius()));
-		mShortestPathTexture.draw(circle);
-	}
-	mShortestPathTexture.display();*/
-	
+{	
 	// Create text and position it in the middle of the block
-	sf::Text text;
-	text.setFont(Toolbox::getFont());
-	text.setCharacterSize(30);
 	mWeightTexture.clear(sf::Color(0, 0, 0, 0));
-
-	for (auto weightPoint : mWeightMap)
+	
+	if (Toolbox::getRenderWeights())
 	{
-		text.setFillColor(sf::Color::Black);
-		text.setString(Toolbox::floatToString(weightPoint.second));
-		// The "first" is a pair of ints
-		sf::Vector2i local(weightPoint.first.first, weightPoint.first.second);
-		sf::Vector2f global = Toolbox::localToGlobalCoords(local);
-		text.setPosition(Toolbox::getMiddleOfBlock(global));
-		text.move(-sf::Vector2f(text.getLocalBounds().width / 2.f, text.getLocalBounds().height / 2.f));
-		mWeightTexture.draw(text);
-
-	}
-
-	/*for (size_t i = 0; i < mWeightMap.size(); i++)
-	{
-		for (size_t j = 0; j < mWeightMap[i].size(); j++)
+		sf::Text text;
+		text.setFont(Toolbox::getFont());
+		text.setCharacterSize(30);
+		for (auto weightPoint : mWeightMap)
 		{
-			if (mWeightMap[i][j] >= 0.0f)
-			{
-				text.setFillColor(sf::Color::Black);
-				text.setString(Toolbox::floatToString(mWeightMap[i][j]));
-				sf::Vector2i local(j, i);
-				sf::Vector2f global = Toolbox::localToGlobalCoords(local);
-				text.setPosition(Toolbox::getMiddleOfBlock(global));
-				text.move(-sf::Vector2f(text.getLocalBounds().width / 2.f, text.getLocalBounds().height / 2.f));
-				mWeightTexture.draw(text);
-			}
+			text.setFillColor(sf::Color::Black);
+			text.setString(Toolbox::floatToString(weightPoint.second));
+			// The "first" is a pair of ints
+			sf::Vector2i local(weightPoint.first.first, weightPoint.first.second);
+			sf::Vector2f global = Toolbox::localToGlobalCoords(local);
+			text.setPosition(Toolbox::getMiddleOfBlock(global));
+			text.move(-sf::Vector2f(text.getLocalBounds().width / 2.f, text.getLocalBounds().height / 2.f));
+			mWeightTexture.draw(text);
 		}
-	}*/
+	}
 	mWeightTexture.display();
 
 }

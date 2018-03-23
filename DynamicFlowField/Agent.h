@@ -16,15 +16,16 @@ public:
 	virtual void kill();
 	virtual bool isAlive() { return mAlive; }
 
-	// Called when target building is lost
+	// Called when needing to search for target
 	void updatePath();
 
 private:
 	bool mAlive = true;
 
-	sf::Vector2f mPosition;
-	float mVelocity = 25.f;
-	sf::Sprite mSprite;
+	sf::Vector2f             mPosition;
+	float                    mSpeed = 25.f;
+	sf::Vector2f             mVelocity;
+	sf::Sprite               mSprite;
 	FlowGenerator::FlowField mFlowField;
 };
 

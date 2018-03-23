@@ -22,4 +22,5 @@ private:
 	sf::Text* mStateText;
 	sf::Text* mRenderWeightText;
 	sf::Text* mRenderClosestPointText;
+	sf::Text* mRenderFlowText;
 };
