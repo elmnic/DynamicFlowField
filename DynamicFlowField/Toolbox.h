@@ -44,9 +44,9 @@ public:
 	static sf::Vector2i globalToIndexCoords(sf::Vector2f& pos);
 	static sf::Vector2f localToGlobalCoords(sf::Vector2i& localPos);
 
-	// Returns middle of block using global coords
 	static sf::Vector2f getMiddleOfBlock(sf::Vector2f& globalPos);
 
+	// Algorithm courtesy of https://wrf.ecse.rpi.edu//Research/Short_Notes/pnpoly.html
 	static int pointInPoly(int nrOfVerts, std::vector<float>& vertX, std::vector<float>& vertY, float testX, float testY);
 
 	static bool getDynamicOrStatic();
@@ -55,13 +55,19 @@ public:
 	static float getMagnitude(sf::Vector2f& vec);
 	static float getDistance(sf::Vector2f& a, sf::Vector2f& b);
 	static sf::Vector2f normalize(sf::Vector2f& vec);
+	static float getAngleBetween(sf::Vector2f& vecA, sf::Vector2f& vecB);
+	static float getDot(sf::Vector2f& vecA, sf::Vector2f& vecB);
+	static float getDet(sf::Vector2f& vecA, sf::Vector2f& vecB);
+	static float cross(sf::Vector2f& a, sf::Vector2f& b, sf::Vector2f& point);
 
 	static bool getRenderWeights();
 	static void toggleRenderWeights();
-
 	static bool getRenderClosestPoints();
 	static void toggleRenderClosestPoints();
-
 	static bool getRenderFlow();
 	static void toggleRenderFlow();
+	static bool getRenderConfirmed();
+	static void toggleRenderConfirmed();
+	static bool getRenderTexts();
+	static void toggleRenderTexts();
 };

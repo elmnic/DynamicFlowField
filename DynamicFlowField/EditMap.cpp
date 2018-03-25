@@ -38,7 +38,7 @@ void EditMap::propagateEvent(Game* game, sf::Event& event)
 {
 	if (event.type == sf::Event::Closed || event.key.code == sf::Keyboard::Escape)
 		mWindow->close();
-	if (event.type == sf::Event::KeyReleased && event.key.code == sf::Keyboard::C)
+	if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::C)
 		game->changeState(RunGame::instance());
 }
 

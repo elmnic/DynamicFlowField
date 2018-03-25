@@ -34,6 +34,7 @@ public:
 
 	FlowGenerator::FlowField generatePath(sf::Vector2f startPos);
 	void render();
+	void renderWeightToTexture();
 	void clear();
 
 	// Breadth-first-search from startPos #
@@ -47,7 +48,6 @@ private:
 	void expandChildren(WeightNode* current);
 	void recreatePath(Queue& cameFrom, WeightNode* node);
 	FlowGenerator::WeightMap& generateWeightMap(sf::Vector2i& startPos, sf::Vector2i& targetPos);
-	void renderToTexture();
 	void clearNodes();
 
 	Queue                    mNodeQueue;
@@ -58,6 +58,7 @@ private:
 	FlowGenerator::FlowField mFlowField;
 	sf::RenderTexture        mShortestPathTexture;
 	sf::RenderTexture        mWeightTexture;
+	bool                     mIsRendered = false;
 
 };
 

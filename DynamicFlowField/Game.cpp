@@ -4,9 +4,15 @@ static int MAPSIZE = 30;
 
 Game::Game()
 {
-	mWindow.create(sf::VideoMode(1900, 1900), "Dynamic Flow Field", sf::Style::Close);
-	mWindow.setFramerateLimit(120);
+	sf::VideoMode mode = sf::VideoMode::getDesktopMode();
+	mWindow.create(sf::VideoMode(mode.height - 200, mode.height - 200), "Dynamic Flow Field", sf::Style::Close);
+	mWindow.setFramerateLimit(200);
+	mWindow.setKeyRepeatEnabled(false);
+	sf::Image icon;
+	icon.loadFromFile("resources/icon.png");
+	mWindow.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
 	Toolbox::setWindow(&mWindow);
+
 
 	// Initial state
 	m_currentState = RunGame::instance();

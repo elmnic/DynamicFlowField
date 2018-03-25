@@ -21,9 +21,13 @@ static std::string mTextureFileConfirmed = "resources/confirmed.png";
 
 static std::atomic<bool> mTerminateSimulation = false;
 static std::atomic<bool> mDynamicOrStatic = true; // True = dynamic, false = static
-static std::atomic<bool> mRenderWeights = true;
+static std::atomic<bool> mRenderWeights = false;
 static std::atomic<bool> mRenderClosestPoints = false;
-static std::atomic<bool> mRenderFlow = true;
+static std::atomic<bool> mRenderFlow = false;
+static std::atomic<bool> mRenderConfirmed = false;
+static std::atomic<bool> mRenderTexts = true;
+
+static float const PI = 3.1415926535897932384f;
 
 Toolbox* Toolbox::instance()
 {
@@ -218,6 +222,27 @@ sf::Vector2f Toolbox::normalize(sf::Vector2f & vec)
 	return normalized;
 }
 
+float Toolbox::getAngleBetween(sf::Vector2f & vecA, sf::Vector2f & vecB)
+{
+	float angle = std::atan2(getDet(vecA, vecB), getDot(vecA, vecB));
+	return angle;
+}
+
+float Toolbox::getDot(sf::Vector2f & vecA, sf::Vector2f & vecB)
+{
+	return vecA.x * vecB.x + vecA.y * vecB.y;
+}
+
+float Toolbox::getDet(sf::Vector2f & vecA, sf::Vector2f & vecB)
+{
+	return vecA.x * vecB.y - vecA.y * vecB.x;
+}
+
+float Toolbox::cross(sf::Vector2f & a, sf::Vector2f & b, sf::Vector2f & point)
+{
+	return ((point.x - a.x) * (b.y - a.y)) - ((point.y - a.y) * (b.x - a.x));
+}
+
 bool Toolbox::getRenderWeights()
 {
 	return mRenderWeights;
@@ -246,5 +271,25 @@ bool Toolbox::getRenderFlow()
 void Toolbox::toggleRenderFlow()
 {
 	mRenderFlow = !mRenderFlow;
+}
+
+bool Toolbox::getRenderConfirmed()
+{
+	return mRenderConfirmed;
+}
+
+void Toolbox::toggleRenderConfirmed()
+{
+	mRenderConfirmed = !mRenderConfirmed;
+}
+
+bool Toolbox::getRenderTexts()
+{
+	return mRenderTexts;
+}
+
+void Toolbox::toggleRenderTexts()
+{
+	mRenderTexts = !mRenderTexts;
 }
 

@@ -18,9 +18,12 @@ private:
 	RunGame(const RunGame&);
 	RunGame& operator=(const RunGame&);
 
+	void updateText(std::string text, sf::Text* sfText, bool status);
+
 	sf::RenderWindow* mWindow;
 	sf::Text* mStateText;
 	sf::Text* mRenderWeightText;
 	sf::Text* mRenderClosestPointText;
 	sf::Text* mRenderFlowText;
+	sf::Text* mRenderConfirmedText;
 };

@@ -21,6 +21,8 @@ public:
 	static EntityManager* instance();
 	~EntityManager();
 
+	void updateBuildingTexture();
+	void updateConfirmedTexture();
 	void createBuilding(int size, Toolbox::BuildingType type, sf::Vector2i pos);
 	void createAgent(sf::Vector2i startPos);
 	void createConfirmed(sf::Vector2i pos);
@@ -30,7 +32,6 @@ public:
 
 	void exit();
 	void clearAgents();
-
 	// Removes stored points from buildings and the Confirmed-buildings
 	void clearConfirmed();
 
@@ -51,6 +52,10 @@ private:
 
 	// Building entities mapped to points
 	BuildingMap mBuildingMap;
+
+	// Render texture for static buildings
+	sf::RenderTexture mBuildingTexture;
+	sf::RenderTexture mConfirmedTexture;
 
 };
 

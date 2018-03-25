@@ -1,7 +1,7 @@
 #pragma once
 #include "Entity.h"
-
 #include "LineRenderer.h"
+#include <algorithm>
 
 class Building :
 	public Entity
@@ -17,6 +17,7 @@ public:
 
 	//------------------- Building specific functions
 
+	sf::Sprite& getSprite() { return mSprite; }
 	int getSize() { return mSize; }
 	Toolbox::BuildingType getType() { return mType; }
 	sf::Vector2i& getPosition() { return mPosition; }
@@ -24,29 +25,38 @@ public:
 	sf::Vector2f getMiddleOfBuildingGlobal();
 
 	// Polygon for confirming flow direction nodes
-	void addPolyPoint(sf::Vector2i point);
+	bool addPolyPoint(sf::Vector2i point);
 	void sortPolyPoints();
+	bool isPointInPoly(sf::Vector2i& point);
 	void clearPolyPoint();
-	std::vector<sf::Vector2i>& getPolyPoints() { return mIndices; }
 	
 	void toggleIndices();
 private:
-	void renderToTexture();
+
+	struct Point
+	{
+		sf::Vector2i coords;
+		bool operator < (const Point& p) const
+		{
+			return coords.x < p.coords.x || (coords.x == p.coords.x && coords.y < p.coords.y);
+		}
+	};
+
+	int cross(const Point& O, const Point &A, const Point &B);
+	void convex_hull();
 
 	// Convert BuildingType enum to TextureCode enum
 	Toolbox::TextureCode buildingToTexture(Toolbox::BuildingType type);
 
-	bool mAlive = true;
-	int mSize;
+	bool                  mAlive = true;
+	int                   mSize;
 	Toolbox::BuildingType mType;
-	sf::Vector2i mPosition;
-	
-	sf::Sprite mSprite;
-
-	bool mRenderIndices;
+	sf::Vector2i          mPosition;
+	sf::Sprite            mSprite;
+	bool                  mRenderIndices;
 
 	// Index in polygon containing confirmed closest points leading to this building
-	std::vector<sf::Vector2i> mIndices;
+	std::vector<Point> mIndices;
 
 	std::vector<sf::Vector2f> mClosestPointTargets;
 

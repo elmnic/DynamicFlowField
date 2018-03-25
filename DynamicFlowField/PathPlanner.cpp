@@ -35,6 +35,7 @@ void PathPlanner::clear()
 	mShortestPath.clear();
 	mShortestPathTexture.clear(sf::Color(0, 0, 0, 0));
 	mWeightTexture.clear(sf::Color(0, 0, 0, 0));
+	mWeightMap.clear();
 }
 
 FlowGenerator::FlowField PathPlanner::generatePath(sf::Vector2f startPos)
@@ -108,6 +109,13 @@ FlowGenerator::FlowField PathPlanner::generatePath(sf::Vector2f startPos)
 			{
 				foundTarget = true;
 
+				if (target != nullptr && target->isPointInPoly(localCoordIndex))
+				{
+					std::cout << "Point was already confirmed\n";
+					EntityManager::instance()->createConfirmed(localCoordIndex);
+					return mFlowField;
+				}				
+
 				// Add point to building to define polygon
 				target->addPolyPoint(localCoordIndex);
 				EntityManager::instance()->createConfirmed(localCoordIndex);
@@ -118,14 +126,13 @@ FlowGenerator::FlowField PathPlanner::generatePath(sf::Vector2f startPos)
 
 				// Generate flow field using weight map
 				mFlowField = FlowGenerator::instance()->createFlowFieldDynamic(mWeightMap);
-
-				renderToTexture();
+				renderWeightToTexture();
 				break;
 			}
 
 		}
 	}
-
+	
 	return mFlowField;
 }
 
@@ -148,8 +155,8 @@ void PathPlanner::expandChildren(WeightNode* current)
 			if (row != 0 && col != 0)
 				continue;
 			// Skip nodes outside map horizontally/vertically
-			if (current->position.x + row < 0 || current->position.x + row > Toolbox::getMapDimensions().x - 1 ||
-				current->position.y + col < 0 || current->position.y + col > Toolbox::getMapDimensions().y - 1)
+			if (current->position.x + col < 0 || current->position.x + col > Toolbox::getMapDimensions().x - 1 ||
+				current->position.y + row < 0 || current->position.y + row > Toolbox::getMapDimensions().y - 1)
 				continue;
 
 			// Create temp point
@@ -198,7 +205,7 @@ void PathPlanner::recreatePath(Queue & cameFrom, WeightNode* node)
 FlowGenerator::WeightMap & PathPlanner::generateWeightMap(sf::Vector2i & startPos, sf::Vector2i & targetPos)
 {
 	// Initialize weight map
-	mWeightMap.clear();
+	//mWeightMap.clear();
 	//mWeightMap.resize(Toolbox::getMapDimensions().y, std::vector<float>(Toolbox::getMapDimensions().x, -1.0f));
 	clearNodes();
 	// Do the same as GeneratePath pretty much, but in the opposite direction.
@@ -211,6 +218,8 @@ FlowGenerator::WeightMap & PathPlanner::generateWeightMap(sf::Vector2i & startPo
 	mNodeLookup[pStart] = nStart;
 	mNodeQueue.push_back(nStart);
 	nStart->visited = true;
+	if (mWeightMap.find(pStart) == mWeightMap.end() || mWeightMap[pStart] > nStart->weight)
+		mWeightMap[pStart] = nStart->weight;
 
 	// Initial conditions
 	bool foundTarget = false;
@@ -241,7 +250,8 @@ FlowGenerator::WeightMap & PathPlanner::generateWeightMap(sf::Vector2i & startPo
 				continue;
 
 			// Add weight to map
-			mWeightMap[point] = child->weight;
+			if (mWeightMap.find(point) == mWeightMap.end() || mWeightMap[point] > child->weight)
+				mWeightMap[point] = child->weight;
 			
 			// Add unvisited child to queue
 			if (!child->visited)
@@ -264,11 +274,10 @@ FlowGenerator::WeightMap & PathPlanner::generateWeightMap(sf::Vector2i & startPo
 	return mWeightMap;
 }
 
-void PathPlanner::renderToTexture()
+void PathPlanner::renderWeightToTexture()
 {	
 	// Create text and position it in the middle of the block
 	mWeightTexture.clear(sf::Color(0, 0, 0, 0));
-	
 	if (Toolbox::getRenderWeights())
 	{
 		sf::Text text;
@@ -287,7 +296,6 @@ void PathPlanner::renderToTexture()
 		}
 	}
 	mWeightTexture.display();
-
 }
 
 void PathPlanner::clearNodes()

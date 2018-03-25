@@ -124,6 +124,10 @@ FlowGenerator::FlowField & FlowGenerator::createFlowFieldDynamic(WeightMap& weig
 				}
 			}
 		}
+		// Skip adding direction vector if the current node is on a building point with 0 weight
+		if(weights[node.first] == 0)
+			continue;
+		
 		// Calculate direction to lowest weight node
 		sf::Vector2i lowestWeight(currentLowestPoint.first, currentLowestPoint.second);
 		sf::Vector2f direction;
@@ -139,12 +143,12 @@ FlowGenerator::FlowField & FlowGenerator::createFlowFieldDynamic(WeightMap& weig
 		mSharedFlowField[node.first] = normalized;
 	}
 
-	renderToTexture();
+	renderFlowToTexture();
 
 	return mSharedFlowField;
 }
 
-void FlowGenerator::renderToTexture()
+void FlowGenerator::renderFlowToTexture()
 {
 	mFlowTexture.clear(sf::Color(0, 0, 0, 0));
 	if (Toolbox::getRenderFlow())

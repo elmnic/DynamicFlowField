@@ -36,12 +36,11 @@ public:
 	FlowField& createFlowFieldDynamic(WeightMap& weights);
 
 	void render();
-
+	void renderFlowToTexture();
 	void clear();
 
 private:
 	FlowGenerator();
-	void renderToTexture();
 
 	WeightMap& generateWeightMap(sf::Vector2i startPos);
 

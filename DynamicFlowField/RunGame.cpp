@@ -19,26 +19,21 @@ void RunGame::enter(sf::RenderWindow& window)
 	std::string truefalse;
 
 	// Set initial text and color depending on the boolean value
-	truefalse = Toolbox::boolToString(Toolbox::getRenderWeights());
-	mRenderWeightText = new sf::Text("Render weights: " + truefalse, Toolbox::getFont());
-	TextRenderer::instance()->addTextElement(mRenderWeightText);
-	mRenderWeightText->setFillColor(sf::Color(145, 0, 27));
-	if (truefalse == "true")
-		mRenderWeightText->setFillColor(sf::Color(0, 145, 27));
-
-	truefalse = Toolbox::boolToString(Toolbox::getRenderClosestPoints());
-	mRenderClosestPointText = new sf::Text("Render closests: " + truefalse, Toolbox::getFont());
+	mRenderClosestPointText = new sf::Text("-", Toolbox::getFont());
 	TextRenderer::instance()->addTextElement(mRenderClosestPointText);
-	mRenderClosestPointText->setFillColor(sf::Color(145, 0, 27));
-	if (truefalse == "true")
-		mRenderClosestPointText->setFillColor(sf::Color(0, 145, 27));
+	updateText("Q - Render closest: ", mRenderClosestPointText, Toolbox::getRenderClosestPoints());
+	
+	mRenderWeightText = new sf::Text("-", Toolbox::getFont());
+	TextRenderer::instance()->addTextElement(mRenderWeightText);
+	updateText("W - Render weights: ", mRenderWeightText, Toolbox::getRenderWeights());
 
-	truefalse = Toolbox::boolToString(Toolbox::getRenderFlow());
-	mRenderFlowText = new sf::Text("Render flow: " + truefalse, Toolbox::getFont());
+	mRenderConfirmedText = new sf::Text("-", Toolbox::getFont());
+	TextRenderer::instance()->addTextElement(mRenderConfirmedText);
+	updateText("E - Render confirmed: ", mRenderConfirmedText, Toolbox::getRenderConfirmed());
+
+	mRenderFlowText = new sf::Text("-", Toolbox::getFont());
 	TextRenderer::instance()->addTextElement(mRenderFlowText);
-	mRenderFlowText->setFillColor(sf::Color(145, 0, 27));
-	if (truefalse == "true")
-		mRenderFlowText->setFillColor(sf::Color(0, 145, 27));
+	updateText("F - Render flow: ", mRenderFlowText, Toolbox::getRenderFlow());
 }
 
 void RunGame::update(Game* game)
@@ -67,43 +62,41 @@ void RunGame::exit()
 
 void RunGame::propagateEvent(Game* game, sf::Event& event)
 {
-	if (event.type == sf::Event::Closed || (mWindow->hasFocus() && event.type == sf::Event::KeyReleased && event.key.code == sf::Keyboard::Escape))
+	if (event.type == sf::Event::Closed || (mWindow->hasFocus() && event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape))
 		mWindow->close();
 
-	if (event.type == sf::Event::KeyReleased && event.key.code == sf::Keyboard::C)
+	if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::C)
 		game->changeState(EditMap::instance());
 
-	if (event.type == sf::Event::KeyReleased && event.key.code == sf::Keyboard::T)
+	if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::T)
 		Toolbox::setTerminateSimulation(false);
 
-	if (event.type == sf::Event::KeyReleased && event.key.code == sf::Keyboard::W) {
-		Toolbox::toggleRenderWeights(); 
-		std::string truefalse = Toolbox::boolToString(Toolbox::getRenderWeights());
-		mRenderWeightText->setFillColor(sf::Color(145, 0, 27));
-		if (truefalse == "true")
-			mRenderWeightText->setFillColor(sf::Color(0, 145, 27));
-		mRenderWeightText->setString("Render wights: " + truefalse);
+	if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Q) {
+		Toolbox::toggleRenderClosestPoints();
+		updateText("Q - Render closests: ", mRenderClosestPointText, Toolbox::getRenderClosestPoints());
 	}
 
-	if (event.type == sf::Event::KeyReleased && event.key.code == sf::Keyboard::Q) {
-		Toolbox::toggleRenderClosestPoints(); 
-		std::string truefalse = Toolbox::boolToString(Toolbox::getRenderClosestPoints());
-		mRenderClosestPointText->setFillColor(sf::Color(145, 0, 27));
-		if (truefalse == "true")
-			mRenderClosestPointText->setFillColor(sf::Color(0, 145, 27));
-		mRenderClosestPointText->setString("Render closests: " + truefalse);
+	if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::W) {
+		Toolbox::toggleRenderWeights();
+		updateText("W - Render wights: ", mRenderWeightText, Toolbox::getRenderWeights());
+		PathPlanner::instance()->renderWeightToTexture();
 	}
 
-	if (event.type == sf::Event::KeyReleased && event.key.code == sf::Keyboard::F) {
+	if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::E) {
+		Toolbox::toggleRenderConfirmed();
+		updateText("E - Render confirmed: ", mRenderConfirmedText, Toolbox::getRenderConfirmed());
+	}
+
+	if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::D)
+		Toolbox::toggleRenderTexts();
+
+	if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::F) {
 		Toolbox::toggleRenderFlow();
-		std::string truefalse = Toolbox::boolToString(Toolbox::getRenderFlow());
-		mRenderFlowText->setFillColor(sf::Color(145, 0, 27));
-		if (truefalse == "true")
-			mRenderFlowText->setFillColor(sf::Color(0, 145, 27));
-		mRenderFlowText->setString("Render flow: " + truefalse);
+		updateText("F - Render flow: ", mRenderFlowText, Toolbox::getRenderFlow());
+		FlowGenerator::instance()->renderFlowToTexture();
 	}
 
-	if (event.type == sf::Event::KeyReleased && event.key.code == sf::Keyboard::Space)
+	if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Space)
 		Map::instance()->startSimulation();
 
 	if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
@@ -116,7 +109,10 @@ void RunGame::propagateEvent(Game* game, sf::Event& event)
 
 		// Toggle showing lines
 		if (building != nullptr && building->getType() == Toolbox::BuildingType::OFFENSIVE)
+		{
 			building->toggleIndices();
+			EntityManager::instance()->updateBuildingTexture();
+		}
 
 		// Only spawn on ground and confirmed
 		if (building != nullptr && building->getType() == Toolbox::BuildingType::POLYPOINT || 
@@ -134,4 +130,13 @@ StateBase::StateID RunGame::getStateID()
 
 RunGame::RunGame()
 {
+}
+
+void RunGame::updateText(std::string text, sf::Text * sfText, bool status)
+{
+	std::string statusString = Toolbox::boolToString(status);
+	sfText->setFillColor(sf::Color(145, 0, 27)); // Red
+	if (status)
+		sfText->setFillColor(sf::Color(0, 145, 27)); // Green
+	sfText->setString(text + statusString);
 }

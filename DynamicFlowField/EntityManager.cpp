@@ -11,6 +11,8 @@ EntityManager* EntityManager::instance()
 
 EntityManager::EntityManager()
 {
+	mBuildingTexture.create(Toolbox::getWindow().getSize().x, Toolbox::getWindow().getSize().y);
+	mConfirmedTexture.create(Toolbox::getWindow().getSize().x, Toolbox::getWindow().getSize().y);
 }
 
 EntityManager::~EntityManager()
@@ -28,7 +30,10 @@ void EntityManager::removeDeadEntities()
 		if (it->isAlive())
 			mBuildings.push_back(it);
 		else
+		{
 			delete it;
+			updateBuildingTexture();
+		}
 	}
 
 	// Deletes all dead agents
@@ -42,6 +47,32 @@ void EntityManager::removeDeadEntities()
 			delete it;
 	}
 }
+void EntityManager::updateBuildingTexture()
+{
+	mBuildingTexture.clear(sf::Color(0, 0, 0, 0));
+
+	for (auto building : mBuildings)
+	{
+		Building* b = (Building*)building;
+		mBuildingTexture.draw(b->getSprite());
+	}
+
+	mBuildingTexture.display();
+}
+
+void EntityManager::updateConfirmedTexture()
+{
+	mConfirmedTexture.clear(sf::Color(0, 0, 0, 0));
+
+	for (auto confirmed : mConfirmed)
+	{
+		Building* b = (Building*)confirmed;
+		mConfirmedTexture.draw(b->getSprite());
+	}
+
+	mConfirmedTexture.display();
+}
+
 //TODO: Render all buildings to a render texture for increased performance. 
 //TODO: Update this render texture every time the building entities are removed
 void EntityManager::createBuilding(int size, Toolbox::BuildingType type, sf::Vector2i pos)
@@ -60,6 +91,9 @@ void EntityManager::createBuilding(int size, Toolbox::BuildingType type, sf::Vec
 
 	// Add building to vector
 	mBuildings.push_back(building);
+
+	// Update the static building texture
+	updateBuildingTexture();
 }
 
 void EntityManager::createAgent(sf::Vector2i startPos)
@@ -74,8 +108,8 @@ void EntityManager::createConfirmed(sf::Vector2i pos)
 	Building *building = new Building(1, Toolbox::BuildingType::POLYPOINT, pos);
 	Point p(pos.x, pos.y);
 	mBuildingMap.insert(std::make_pair(p, building));
-
 	mConfirmed.push_back(building);
+	updateConfirmedTexture();
 }
 
 void EntityManager::queueAgent(sf::Vector2i startPos, float spawnTime)
@@ -116,10 +150,21 @@ void EntityManager::update()
 void EntityManager::render(sf::RenderWindow & window)
 {
 	for (auto it : mBuildings)
-		it->render(window);
+	{
+		Building* building = (Building*)it;
+		if (building->getType() == Toolbox::BuildingType::OFFENSIVE)
+			it->render(window);
+	}
 
-	for (auto it : mConfirmed)
-		it->render(window);
+	sf::Sprite staticBuildingTex(mBuildingTexture.getTexture());
+	Toolbox::getWindow().draw(staticBuildingTex);
+
+	
+	if (Toolbox::getRenderConfirmed())
+	{
+		sf::Sprite staticConfirmedTex(mConfirmedTexture.getTexture());
+		Toolbox::getWindow().draw(staticConfirmedTex);
+	}
 
 	for (auto it : mAgents)
 		it->render(window);
@@ -143,6 +188,7 @@ void EntityManager::exit()
 
 	mBuildings.clear();
 	mBuildingMap.clear();
+
 
 }
 

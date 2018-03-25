@@ -21,16 +21,18 @@ TextRenderer::~TextRenderer()
 
 void TextRenderer::render()
 {
-	// Position each text above each other
-	for (size_t i = 0; i < mTexts.size(); i++)
+	if (Toolbox::getRenderTexts())
 	{
-		Toolbox::getWindow().draw(*mTexts[i]);
+		for (size_t i = 0; i < mTexts.size(); i++)
+		{
+			Toolbox::getWindow().draw(*mTexts[i]);
+		}
 	}
 }
 
 void TextRenderer::addTextElement(sf::Text* text)
 {
-	// Add text and move it down
+	// Add text and move it down so they stack on top of each other
 	text->setCharacterSize(35);
 	text->setFillColor(sf::Color::Black);
 	text->setOutlineColor(sf::Color::White);
