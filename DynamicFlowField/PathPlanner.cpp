@@ -38,7 +38,7 @@ void PathPlanner::clear()
 	mWeightMap.clear();
 }
 
-FlowGenerator::FlowField PathPlanner::generatePath(sf::Vector2f startPos)
+FlowGenerator::FlowField PathPlanner::generatePath(sf::Vector2f startPos, Agent* agent)
 {
 	// Clear Lookup and Queue
 	clearNodes();
@@ -51,7 +51,7 @@ FlowGenerator::FlowField PathPlanner::generatePath(sf::Vector2f startPos)
 
 	// Check if startPos is already confirmed. Exit and use pre-existing flow field if true
 	Building* testFor = EntityManager::instance()->isBuilding(pStart);
-	if (testFor != nullptr && testFor->getType() == Toolbox::BuildingType::POLYPOINT)
+	if (testFor != nullptr && testFor->getType() == Toolbox::BuildingType::POLYPOINT && Toolbox::getGenerateDynamicFlow())
 	{
 		std::cout << "Start pos was already confirmed\n";
 		return mFlowField;
@@ -109,12 +109,15 @@ FlowGenerator::FlowField PathPlanner::generatePath(sf::Vector2f startPos)
 			{
 				foundTarget = true;
 
-				if (target != nullptr && target->isPointInPoly(localCoordIndex))
+				// Point was already confirmed, return the flow field if generation is set to dynamic
+				if (target != nullptr && target->isPointInPoly(localCoordIndex) && Toolbox::getGenerateDynamicFlow())
 				{
 					std::cout << "Point was already confirmed\n";
 					EntityManager::instance()->createConfirmed(localCoordIndex);
 					return mFlowField;
-				}				
+				}
+
+				// Target was found!
 
 				// Add point to building to define polygon
 				target->addPolyPoint(localCoordIndex);
@@ -124,8 +127,15 @@ FlowGenerator::FlowField PathPlanner::generatePath(sf::Vector2f startPos)
 				sf::Vector2i closestPointOnBuilding = target->getPositionClosest(startPos);
 				generateWeightMap(closestPointOnBuilding, localCoordIndex);
 
-				// Generate flow field using weight map
-				mFlowField = FlowGenerator::instance()->createFlowFieldDynamic(mWeightMap);
+				// Add target to agent to know when it has arrived
+				agent->addTarget(closestPointOnBuilding);
+
+				// Generate flow field with weight map using either dynamic or static generation.
+				if (Toolbox::getGenerateDynamicFlow())
+					mFlowField = FlowGenerator::instance()->createFlowFieldDynamic(mWeightMap);
+				else
+					mFlowField = FlowGenerator::instance()->createFlowFieldStatic(mWeightMap);
+
 				renderWeightToTexture();
 				break;
 			}
@@ -204,11 +214,14 @@ void PathPlanner::recreatePath(Queue & cameFrom, WeightNode* node)
 
 FlowGenerator::WeightMap & PathPlanner::generateWeightMap(sf::Vector2i & startPos, sf::Vector2i & targetPos)
 {
-	// Initialize weight map
-	//mWeightMap.clear();
-	//mWeightMap.resize(Toolbox::getMapDimensions().y, std::vector<float>(Toolbox::getMapDimensions().x, -1.0f));
+	// Clear weight map if generation is set to static
+	if (!Toolbox::getGenerateDynamicFlow())
+		mWeightMap.clear();
+
+	// Clear earlier nodeQueue in case
 	clearNodes();
-	// Do the same as GeneratePath pretty much, but in the opposite direction.
+
+	/* Do the same as GeneratePath pretty much, but in the opposite direction. */
 
 	// Create start node
 	EntityManager::Point pStart(startPos.x, startPos.y);

@@ -20,6 +20,26 @@ EntityManager::~EntityManager()
 	exit();
 }
 
+void EntityManager::checkCollision()
+{
+	// Loop through all agents and check if they overlap with any buildings
+	for (auto building : mBuildings)
+	{
+		Building *b = (Building*)building;
+		if (b->getType() == Toolbox::BuildingType::OFFENSIVE)
+		{
+			for (auto agent : mAgents)
+			{
+				if (agent->getSprite().getGlobalBounds().intersects(building->getSprite().getGlobalBounds()))
+				{
+					agent->kill();
+					b->damage();
+				}
+			}
+		}
+	}
+}
+
 void EntityManager::removeDeadEntities()
 {
 	// Deletes all dead buildings
@@ -31,10 +51,15 @@ void EntityManager::removeDeadEntities()
 			mBuildings.push_back(it);
 		else
 		{
+			// Building is to be removed.
 			delete it;
+			Toolbox::setIsFinished(true);
 			updateBuildingTexture();
 		}
 	}
+
+	if (mBuildings.empty())
+		mFinishedScenario = true;
 
 	// Deletes all dead agents
 	EntityVector agents = mAgents;
@@ -73,7 +98,6 @@ void EntityManager::updateConfirmedTexture()
 	mConfirmedTexture.display();
 }
 
-//TODO: Render all buildings to a render texture for increased performance. 
 //TODO: Update this render texture every time the building entities are removed
 void EntityManager::createBuilding(int size, Toolbox::BuildingType type, sf::Vector2i pos)
 {
@@ -122,6 +146,7 @@ void EntityManager::queueAgent(sf::Vector2i startPos, float spawnTime)
 void EntityManager::startAgentSpawner()
 {
 	AgentSpawner::instance()->run();
+	Toolbox::setIsFinished(false);
 }
 
 // Search a point and return its building if it exists
@@ -142,13 +167,26 @@ void EntityManager::update()
 		it->update();
 
 	for (auto it : mAgents)
+	{
 		it->update();
+		Agent* agent = (Agent*)it;
+		// Target was found dead, search for new 
+		if (mBuildingsKilled)
+		{
+			agent->updatePath();
+			mBuildingsKilled = false;
+		}
+
+	}
+
+	checkCollision();
 
 	removeDeadEntities();
 }
 
 void EntityManager::render(sf::RenderWindow & window)
 {
+	// Render lines from building
 	for (auto it : mBuildings)
 	{
 		Building* building = (Building*)it;
@@ -156,10 +194,11 @@ void EntityManager::render(sf::RenderWindow & window)
 			it->render(window);
 	}
 
+	// Render building texture
 	sf::Sprite staticBuildingTex(mBuildingTexture.getTexture());
 	Toolbox::getWindow().draw(staticBuildingTex);
-
 	
+	// Render confirmed texture
 	if (Toolbox::getRenderConfirmed())
 	{
 		sf::Sprite staticConfirmedTex(mConfirmedTexture.getTexture());
@@ -168,28 +207,23 @@ void EntityManager::render(sf::RenderWindow & window)
 
 	for (auto it : mAgents)
 		it->render(window);
-
 }
 
 void EntityManager::exit()
 {
-	clearConfirmed();
-
 	for (auto it : mBuildings)
 		delete it;
-
-	clearAgents();
 
 	for (BuildingMap::iterator it = mBuildingMap.begin(), next_it = mBuildingMap.begin(); it != mBuildingMap.end(); it = next_it)
 	{
 		next_it = it; ++next_it;
 		mBuildingMap.erase(it);
 	}
-
 	mBuildings.clear();
 	mBuildingMap.clear();
 
-
+	clearConfirmed();
+	clearAgents();
 }
 
 void EntityManager::clearAgents()
@@ -211,7 +245,7 @@ void EntityManager::clearConfirmed()
 	for (size_t i = 0; i < mConfirmed.size(); i++)
 	{
 		Building* b = (Building*)mConfirmed[i];
-		Point p(b->getPosition().x, b->getPosition().y);
+		Point p((int)b->getPosition().x, (int)b->getPosition().y);
 		mBuildingMap.erase(p);
 
 		delete mConfirmed[i];

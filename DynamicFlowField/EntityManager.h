@@ -3,6 +3,7 @@
 #include <string>
 #include <SFML\Graphics.hpp>
 #include <map>
+#include <algorithm>
 
 #include "Toolbox.h"
 #include "Agent.h"
@@ -30,6 +31,8 @@ public:
 	void update();
 	void render(sf::RenderWindow &window);
 
+	int getNrOfAgents() { return mAgents.size(); }
+
 	void exit();
 	void clearAgents();
 	// Removes stored points from buildings and the Confirmed-buildings
@@ -43,12 +46,17 @@ public:
 private:
 	EntityManager();
 
+	void checkCollision();
 	void removeDeadEntities();
+
+	bool mFinishedScenario = false;
 
 	// Entities
 	EntityVector mBuildings;
 	EntityVector mConfirmed;
 	EntityVector mAgents;
+
+	bool mBuildingsKilled = false;
 
 	// Building entities mapped to points
 	BuildingMap mBuildingMap;

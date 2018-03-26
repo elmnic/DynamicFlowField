@@ -10,15 +10,18 @@ RunGame * RunGame::instance()
 void RunGame::enter(sf::RenderWindow& window)
 {
 	mWindow = &window;
-	std::string test = "lol";
-	Map::instance()->loadMap(test);
+	Map::instance()->loadMap(Toolbox::LevelCode::LevelDebug);
 
 	mStateText = new sf::Text("Run Game", Toolbox::getFont());
 	TextRenderer::instance()->addTextElement(mStateText);
 
-	std::string truefalse;
-
 	// Set initial text and color depending on the boolean value
+	mScenarioNrText = new sf::Text("Scenario Debug", Toolbox::getFont());
+	TextRenderer::instance()->addTextElement(mScenarioNrText);
+
+	mNrOfAgentsText = new sf::Text("Agents: ", Toolbox::getFont());
+	TextRenderer::instance()->addTextElement(mNrOfAgentsText);
+
 	mRenderClosestPointText = new sf::Text("-", Toolbox::getFont());
 	TextRenderer::instance()->addTextElement(mRenderClosestPointText);
 	updateText("Q - Render closest: ", mRenderClosestPointText, Toolbox::getRenderClosestPoints());
@@ -31,6 +34,10 @@ void RunGame::enter(sf::RenderWindow& window)
 	TextRenderer::instance()->addTextElement(mRenderConfirmedText);
 	updateText("E - Render confirmed: ", mRenderConfirmedText, Toolbox::getRenderConfirmed());
 
+	mFlowGenerationText = new sf::Text("-", Toolbox::getFont());
+	TextRenderer::instance()->addTextElement(mFlowGenerationText);
+	updateText("S - Dynamic flow generation: ", mFlowGenerationText, Toolbox::getGenerateDynamicFlow());
+
 	mRenderFlowText = new sf::Text("-", Toolbox::getFont());
 	TextRenderer::instance()->addTextElement(mRenderFlowText);
 	updateText("F - Render flow: ", mRenderFlowText, Toolbox::getRenderFlow());
@@ -38,7 +45,10 @@ void RunGame::enter(sf::RenderWindow& window)
 
 void RunGame::update(Game* game)
 {
-	EntityManager::instance()->update();
+	if (!Toolbox::isFinished())
+		EntityManager::instance()->update();
+	
+	mNrOfAgentsText->setString("Agents: " + std::to_string(EntityManager::instance()->getNrOfAgents()));
 }
 
 void RunGame::render()
@@ -65,6 +75,9 @@ void RunGame::propagateEvent(Game* game, sf::Event& event)
 	if (event.type == sf::Event::Closed || (mWindow->hasFocus() && event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape))
 		mWindow->close();
 
+	if (event.type == sf::Event::KeyPressed && event.key.code >= sf::Keyboard::Num0 && event.key.code <= sf::Keyboard::Num9)
+		changeScenario(event);
+
 	if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::C)
 		game->changeState(EditMap::instance());
 
@@ -87,6 +100,11 @@ void RunGame::propagateEvent(Game* game, sf::Event& event)
 		updateText("E - Render confirmed: ", mRenderConfirmedText, Toolbox::getRenderConfirmed());
 	}
 
+	if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::S) {
+		Toolbox::toggleGenerateDynamicFlow();
+		updateText("S - Dynamic flow generation: ", mFlowGenerationText, Toolbox::getGenerateDynamicFlow());
+	}
+
 	if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::D)
 		Toolbox::toggleRenderTexts();
 
@@ -96,8 +114,13 @@ void RunGame::propagateEvent(Game* game, sf::Event& event)
 		FlowGenerator::instance()->renderFlowToTexture();
 	}
 
-	if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Space)
+	if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::L)
+		Toolbox::toggleFrameRateLocked();
+
+	if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Space) {
 		Map::instance()->startSimulation();
+		Toolbox::setIsFinished(false);
+	}
 
 	if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
 	{
@@ -139,4 +162,49 @@ void RunGame::updateText(std::string text, sf::Text * sfText, bool status)
 	if (status)
 		sfText->setFillColor(sf::Color(0, 145, 27)); // Green
 	sfText->setString(text + statusString);
+}
+
+void RunGame::changeScenario(sf::Event& event)
+{
+	Map::instance()->unloadMap();
+	Toolbox::LevelCode scenario;
+	switch (event.key.code)
+	{
+	case sf::Keyboard::Num0:
+		scenario = Toolbox::LevelCode::LevelDebug;
+		Toolbox::setIsFinished(false);
+		break;
+	case sf::Keyboard::Num1:
+		scenario = Toolbox::LevelCode::Level1;
+		break;
+	case sf::Keyboard::Num2:
+		scenario = Toolbox::LevelCode::Level2;
+		break;
+	case sf::Keyboard::Num3:
+		scenario = Toolbox::LevelCode::Level3;
+		break;
+	case sf::Keyboard::Num4:
+		scenario = Toolbox::LevelCode::Level4;
+		break;
+	case sf::Keyboard::Num5:
+		scenario = Toolbox::LevelCode::Level5;
+		break;
+	case sf::Keyboard::Num6:
+		scenario = Toolbox::LevelCode::Level6;
+		break;
+	case sf::Keyboard::Num7:
+		scenario = Toolbox::LevelCode::Level7;
+		break;
+	case sf::Keyboard::Num8:
+		scenario = Toolbox::LevelCode::Level8;
+		break;
+	case sf::Keyboard::Num9:
+		scenario = Toolbox::LevelCode::Level9;
+		break;
+	default:
+		scenario = Toolbox::LevelCode::LevelDebug;
+		Toolbox::setIsFinished(false);
+		break;
+	}
+	Map::instance()->loadMap(scenario);
 }

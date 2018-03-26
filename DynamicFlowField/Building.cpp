@@ -32,10 +32,13 @@ Building::Building(int size, Toolbox::BuildingType type, sf::Vector2i pos) :
 
 Building::~Building()
 {
+	clearPolyPoint();
 }
 
 void Building::update()
 {
+	if (mHealth <= 0)
+		kill();
 }
 
 void Building::render(sf::RenderWindow& window)
@@ -46,7 +49,7 @@ void Building::render(sf::RenderWindow& window)
 	// Draw lines between polygon points
 	if (mRenderIndices)
 	{
-		for (int i = 0; i < mIndices.size() - 1; i++)
+		for (size_t i = 0; i < mIndices.size() - 1; i++)
 		{
 			sf::Vector2f start = Toolbox::localToGlobalCoords(mIndices[i].coords);
 			             start = Toolbox::getMiddleOfBlock(start);
@@ -62,7 +65,7 @@ void Building::render(sf::RenderWindow& window)
 	}
 
 	if (Toolbox::getRenderClosestPoints())
-		for (int i = 0; i < mClosestPointTargets.size(); i+=2)
+		for (size_t i = 0; i < mClosestPointTargets.size(); i+=2)
 			LineRenderer::instance()->renderLine(mClosestPointTargets[i], mClosestPointTargets[i + 1]);
 }
 
@@ -111,7 +114,7 @@ bool Building::addPolyPoint(sf::Vector2i point)
 	P.coords.x = point.x;
 	P.coords.y = point.y;
 	mIndices.push_back(P);
-	std::cout << "mIndices size: " << mIndices.size() << "\n";
+	//std::cout << "mIndices size: " << mIndices.size() << "\n";
 
 	// Remove old points that are now inside polygon and create a convex hull surrounding all other points
 	convex_hull();
@@ -152,216 +155,6 @@ void Building::convex_hull()
 // Only keep outermost points
 void Building::sortPolyPoints()
 {
-	
-
-	////
-	//std::vector<sf::Vector2i> mVertices = mIndices;
-	//mIndices.clear();
-	//sf::Vector2i leftMost = mVertices[0];
-
-	//// Find the leftmost and uppermost vertex
-	//for (int i = 0; i < mVertices.size(); i++)
-	//{
-	//	if (mVertices[i].x < leftMost.x)
-	//		leftMost = mVertices[i];
-	//	else if (mVertices[i].x == leftMost.x)
-	//	{
-	//		if (mVertices[i].y < leftMost.y)
-	//			leftMost = mVertices[i];
-	//	}
-	//}
-	//// Add the first one back to the vector
-	////mIndices.push_back(leftMost);
-	//sf::Vector2i current = leftMost;
-
-	//for (size_t i = 0; i < mVertices.size(); i++)
-	//{
-	//	if (!mIndices.empty())
-	//	{
-	//	}
-	//	for (size_t j = 0; j < mVertices.size(); j++)
-	//	{
-	//		// Skip itself
-	//		if (i == j)
-	//			continue;
-
-	//		// Used to check how many points there were on each side
-	//		int negative = 0;
-	//		int positive = 0;
-
-	//		// Skip points that are already confirmed as outer point
-	//		bool alreadyStored = false;
-	//		for (auto it : mIndices)
-	//		{
-	//			if (it == mVertices[j])
-	//				alreadyStored = true;
-	//		}
-	//		if (alreadyStored)
-	//			break;
-
-	//		// Check each point
-	//		sf::Vector2f vecA = sf::Vector2f(mVertices[i].x, mVertices[i].y);
-	//		sf::Vector2f vecB = sf::Vector2f(mVertices[j].x, mVertices[j].y);
-	//		for (size_t pointCheck = 0; pointCheck < mVertices.size(); pointCheck++)
-	//		{
-	//			// Skip themselves
-	//			if (j == pointCheck || i == pointCheck)
-	//				continue;
-
-	//			// Calculates which side the point is on the line between vecA and vecB
-	//			sf::Vector2f point = sf::Vector2f(mVertices[j].x, mVertices[j].y);
-	//			float sign = Toolbox::cross(vecA, vecB, point);
-	//			if (sign < 0)
-	//				negative++;
-	//			else if (sign > 0)
-	//				positive++;
-	//		}
-	//		if (negative == 0 || positive == 0)
-	//		{
-	//			mIndices.push_back(mVertices[j]);
-	//		}
-	//	}
-	//}
-
-	// #########################
-	//int iterator = 0;
-	//bool backAtStart = false;
-	//while (!backAtStart)
-	//{
-	//	std::cout << "Iterator: " << iterator << "\n";
-	//	if (iterator != 0 && mIndices[iterator] == mIndices.front())
-	//	{
-	//		backAtStart = true;
-	//		break;
-	//	}
-
-	//	int negative = 0;
-	//	int positive = 0;
-	//	bool alreadyChecked = false;
-	//	for (int i = 0; i < mVertices.size(); i++)
-	//	{
-	//		for (int j = 0; j < mVertices.size(); j++)
-	//		{
-	//			if (i == j)
-	//				continue;
-
-	//			// Check which side of the line the point is
-	//			sf::Vector2f vecA = sf::Vector2f(mIndices[iterator].x, mIndices[iterator].y);
-	//			sf::Vector2f vecB = sf::Vector2f(mVertices[i].x, mVertices[i].y);
-	//			sf::Vector2f point = sf::Vector2f(mVertices[j].x, mVertices[j].y);
-	//			float sign = Toolbox::cross(vecA, vecB, point);
-	//			if (sign < 0)
-	//				negative++;
-	//			else if (sign > 0)
-	//				positive++;
-	//			//else
-	//				// On the line
-	//		}
-	//		if ((negative == 0 || positive == 0) && !alreadyChecked)
-	//		{
-	//			// Found a pair
-	//			mIndices.push_back(mVertices[i]);
-	//			break;
-	//		}
-	//	}
-	//	iterator++;
-	//}
-
-
-	/*sf::Vector2i smallestAngleVertex = mVertices[1];
-	float smallestAngle = 3.f;
-	bool backAtStart = false;*/
-
-	//while (!backAtStart)
-	//{		
-	//	// Second to last vertex is current reference
-	//	if (mIndices.size() > 1)
-	//	{
-	//		reference = mVertices.end()[-2];
-	//		cur = mVertices.end()[-1];
-	//	}
-
-	//	// Find the next vertex with the smallest angle relative to reference
-	//	for (int i = 0; i < mVertices.size(); i++)
-	//	{
-	//		// Skip itself and the reference
-	//		if (mVertices[i] == reference || mVertices[i] == cur)
-	//			continue;
-
-	//		// Direction from current to reference
-	//		sf::Vector2f ref                = sf::Vector2f(reference.x, reference.y);
-	//		sf::Vector2f current            = sf::Vector2f(cur.x, cur.y);
-	//		sf::Vector2f referenceDirection = ref - current;
-
-	//		// Direction from current to other
-	//		sf::Vector2f other              = sf::Vector2f(mVertices[i].x, mVertices[i].y);
-	//		sf::Vector2f otherDirection     = other - current;
-
-	//		// Angle between reference and other direction
-	//		float testAngle = Toolbox::getAngleBetween(otherDirection, referenceDirection);
-	//		if (testAngle < smallestAngle)
-	//		{
-	//			smallestAngle = testAngle;
-	//			smallestAngleVertex = mVertices[i];
-	//		}
-	//	}
-	//	// Save the vertex that had the smallest angle, unless it was the beginning again
-	//	if (mVertices[0] != smallestAngleVertex)
-	//		mIndices.push_back(smallestAngleVertex);
-	//	else
-	//		backAtStart = true;
-	//}
-
-
-	/* 
-	1. Find the leftmost vertex (minimum x). If there's more than one, choose the lowest of them (minimum y). 
-		There is no vertex below the current one, so take the direction 'downwards' as a reference.
-	2. Find all edges going from the current vertex and calculate their directions (bearings). 
-		Find the one which makes the smallest positive angle (counter-clockwise) from the reference direction. 
-		That will be the outline segment.
-	3. Select its other end as your new 'current' vertex and set the direction from that vertex 
-		to the recent one as a new reference direction.
-	4. Proceed from step 2 until you arrive to the start vertex.
-	*/
-
-	// #############################################################
-	//std::vector<float> vertX;
-	//std::vector<float> vertY;
-
-	//std::vector<sf::Vector2i> indices = mIndices;
-	//mIndices.clear();
-
-	//for (size_t i = 0; i < indices.size(); i++)
-	//{
-	//	// Add building middle
-	//	vertX.push_back(this->getMiddleOfBuildingGlobal().x);
-	//	vertY.push_back(this->getMiddleOfBuildingGlobal().y);
-
-	//	// Add all other points to poly test vector
-	//	for (size_t j = 0; j < indices.size(); j++)
-	//	{
-	//		// Skip itself
-	//		if (i != j)
-	//		{
-	//			sf::Vector2f global = Toolbox::localToGlobalCoords(indices[j]);
-	//			sf::Vector2f middle = Toolbox::getMiddleOfBlock(global);
-	//			vertX.push_back(middle.x);
-	//			vertY.push_back(middle.y);
-	//		}
-	//	}
-
-	//	// Create test point
-	//	sf::Vector2f testPoint = Toolbox::localToGlobalCoords(indices[i]);
-	//	sf::Vector2f testPointMiddle = Toolbox::getMiddleOfBlock(testPoint);
-
-	//	// Test if old point is inside polygon. Keep those that are still outside
-	//	int inOut = Toolbox::pointInPoly(indices.size(), vertX, vertY, testPointMiddle.x, testPointMiddle.y);
-	//	if (!inOut)
-	//		mIndices.push_back(indices[i]);
-
-	//	vertX.clear();
-	//	vertY.clear();
-	//}
 }
 
 bool Building::isPointInPoly(sf::Vector2i & point)
@@ -381,7 +174,8 @@ bool Building::isPointInPoly(sf::Vector2i & point)
 	sf::Vector2f global = Toolbox::localToGlobalCoords(point);
 	sf::Vector2f middle = Toolbox::getMiddleOfBlock(global);
 	int inside = Toolbox::pointInPoly(mIndices.size(), vertX, vertY, middle.x, middle.y);
-	std::cout << "point in polygon: " << inside << "\n";
+	//std::cout << "point in polygon: " << inside << "\n";
+	/*std::cout << "Size of block: " << Toolbox::getMapBlockSize().x << "\nSize of textureRect: " << mSprite.getTextureRect().width << "\n";*/
 
 	return inside;
 }

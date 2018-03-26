@@ -14,13 +14,14 @@ public:
 	virtual void render(sf::RenderWindow& window);
 	virtual void kill();
 	virtual bool isAlive() { return mAlive; }
+	virtual const sf::Vector2f& getPosition() { return mSprite.getPosition(); }
+	virtual const sf::Sprite& getSprite() { return mSprite; }
 
 	//------------------- Building specific functions
 
-	sf::Sprite& getSprite() { return mSprite; }
+	void damage() { mHealth--; }
 	int getSize() { return mSize; }
 	Toolbox::BuildingType getType() { return mType; }
-	sf::Vector2i& getPosition() { return mPosition; }
 	sf::Vector2i getPositionClosest(sf::Vector2f& globalTarget);
 	sf::Vector2f getMiddleOfBuildingGlobal();
 
@@ -50,6 +51,7 @@ private:
 
 	bool                  mAlive = true;
 	int                   mSize;
+	int                   mHealth = 10;
 	Toolbox::BuildingType mType;
 	sf::Vector2i          mPosition;
 	sf::Sprite            mSprite;

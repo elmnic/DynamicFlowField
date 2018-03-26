@@ -27,6 +27,9 @@ static std::atomic<bool> mRenderFlow = false;
 static std::atomic<bool> mRenderConfirmed = false;
 static std::atomic<bool> mRenderTexts = true;
 
+static std::atomic<bool> mIsFinished = false;
+static std::atomic<bool> mIsFrameRateLocked = true;
+
 static float const PI = 3.1415926535897932384f;
 
 Toolbox* Toolbox::instance()
@@ -151,7 +154,7 @@ std::string Toolbox::boolToString(bool value)
 }
 
 // Convert mouse position to a coordinate on the 2D grid
-sf::Vector2i Toolbox::globalToIndexCoords(sf::Vector2f& pos)
+sf::Vector2i Toolbox::globalToIndexCoords(const sf::Vector2f& pos)
 {
 	float xTileSize = getMapBlockSize().x;
 	float yTileSize = getMapBlockSize().y;
@@ -163,7 +166,7 @@ sf::Vector2i Toolbox::globalToIndexCoords(sf::Vector2f& pos)
 	return mouseIndex;
 }
 
-sf::Vector2f Toolbox::localToGlobalCoords(sf::Vector2i& localPos)
+sf::Vector2f Toolbox::localToGlobalCoords(const sf::Vector2i& localPos)
 {
 	float globalX = localPos.x * getMapBlockSize().x;
 	float globalY = localPos.y * getMapBlockSize().y;
@@ -189,12 +192,12 @@ int Toolbox::pointInPoly(int nrOfVerts, std::vector<float>& vertX, std::vector<f
 	return c;
 }
 
-bool Toolbox::getDynamicOrStatic()
+bool Toolbox::getGenerateDynamicFlow()
 {
 	return mDynamicOrStatic;
 }
 
-void Toolbox::ToggleDynamicOrStatic()
+void Toolbox::toggleGenerateDynamicFlow()
 {
 	mDynamicOrStatic = !mDynamicOrStatic;
 }
@@ -291,5 +294,30 @@ bool Toolbox::getRenderTexts()
 void Toolbox::toggleRenderTexts()
 {
 	mRenderTexts = !mRenderTexts;
+}
+
+bool Toolbox::isFinished()
+{
+	return mIsFinished;
+}
+
+void Toolbox::setIsFinished(bool value)
+{
+	mIsFinished = value;
+}
+
+bool Toolbox::isFrameRateLocked()
+{
+	return mIsFrameRateLocked;
+}
+
+void Toolbox::toggleFrameRateLocked()
+{
+	mIsFrameRateLocked = !mIsFrameRateLocked;
+}
+
+void Toolbox::setFrameRateLocked()
+{
+	mIsFrameRateLocked = true;
 }
 

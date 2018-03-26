@@ -10,6 +10,7 @@ EditMap * EditMap::instance()
 
 void EditMap::enter(sf::RenderWindow& window)
 {
+	Toolbox::setFrameRateLocked();
 	mWindow = &window;
 
 	mStateText = new sf::Text("Edit Map", Toolbox::getFont());

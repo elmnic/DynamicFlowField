@@ -9,6 +9,8 @@
 
 #include "Entity.h"
 #include "EntityManager.h"
+#include "PathPlanner.h"
+#include "FlowGenerator.h"
 
 
 // 2D-vector containing the IDs of buildings and ground
@@ -22,7 +24,7 @@ public:
 	static Map* instance();
 	~Map();
 
-	void loadMap(std::string &mapName);
+	void loadMap(Toolbox::LevelCode scenario);
 	void unloadMap();
 	void saveMap(); //TODO:
 

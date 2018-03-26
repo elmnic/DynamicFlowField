@@ -55,5 +55,10 @@ void Agent::kill()
 // Called when spawning and when current target is lost
 void Agent::updatePath()
 {
-	mFlowField = PathPlanner::instance()->generatePath(mSprite.getPosition());
+	mFlowField = PathPlanner::instance()->generatePath(mSprite.getPosition(), this);
+}
+
+void Agent::addTarget(const sf::Vector2i target)
+{
+	mTarget = target;
 }

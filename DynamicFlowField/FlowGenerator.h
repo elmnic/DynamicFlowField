@@ -27,7 +27,7 @@ public:
 	~FlowGenerator();
 
 	/*TODO: Use generatePath from PathPlanner but from the target building position until the agent's position is found.
-		Store the generated weights and compute a direction field and either store or just return the field, 
+		Store the generated weights and compute a direction field and either store or clear the field after compute, 
 		depending on static or dynamic*/
 	// Non dynamic flow field
 	FlowField& createFlowFieldStatic(WeightMap& weights);
@@ -41,8 +41,7 @@ public:
 
 private:
 	FlowGenerator();
-
-	WeightMap& generateWeightMap(sf::Vector2i startPos);
+	FlowField& generateFlowField(WeightMap& weights, FlowField& workField);
 
 	WeightMap mSharedWeightMap;
 	FlowField mSharedFlowField;

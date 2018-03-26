@@ -5,7 +5,7 @@
 #include <map>
 #include <list>
 
-
+class Agent;
 
 struct WeightNode 
 {
@@ -32,7 +32,7 @@ public:
 	static PathPlanner* instance();
 	~PathPlanner();
 
-	FlowGenerator::FlowField generatePath(sf::Vector2f startPos);
+	FlowGenerator::FlowField generatePath(sf::Vector2f startPos, Agent* agent);
 	void render();
 	void renderWeightToTexture();
 	void clear();

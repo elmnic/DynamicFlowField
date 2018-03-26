@@ -19,6 +19,7 @@ private:
 	RunGame& operator=(const RunGame&);
 
 	void updateText(std::string text, sf::Text* sfText, bool status);
+	void changeScenario(sf::Event& event);
 
 	sf::RenderWindow* mWindow;
 	sf::Text* mStateText;
@@ -26,4 +27,7 @@ private:
 	sf::Text* mRenderClosestPointText;
 	sf::Text* mRenderFlowText;
 	sf::Text* mRenderConfirmedText;
+	sf::Text* mFlowGenerationText;
+	sf::Text* mScenarioNrText;
+	sf::Text* mNrOfAgentsText;
 };

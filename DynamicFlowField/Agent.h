@@ -15,10 +15,14 @@ public:
 	virtual void render(sf::RenderWindow& window);
 	virtual void kill();
 	virtual bool isAlive() { return mAlive; }
+	virtual const sf::Vector2f& getPosition() { return mSprite.getPosition(); }
+	virtual const sf::Sprite& getSprite() { return mSprite; }
 
 	// Called when needing to search for target
 	void updatePath();
-
+	void addTarget(const sf::Vector2i target);
+	sf::Vector2i getTarget() { return mTarget; }
+		
 private:
 	bool mAlive = true;
 
@@ -27,5 +31,6 @@ private:
 	sf::Vector2f             mVelocity;
 	sf::Sprite               mSprite;
 	FlowGenerator::FlowField mFlowField;
+	sf::Vector2i             mTarget;
 };
 

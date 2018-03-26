@@ -1,12 +1,12 @@
 #include "Game.h"
 
-static int MAPSIZE = 30;
+const int FRAMELOCK = 200;
 
 Game::Game()
 {
 	sf::VideoMode mode = sf::VideoMode::getDesktopMode();
 	mWindow.create(sf::VideoMode(mode.height - 200, mode.height - 200), "Dynamic Flow Field", sf::Style::Close);
-	mWindow.setFramerateLimit(200);
+	mWindow.setFramerateLimit(FRAMELOCK);
 	mWindow.setKeyRepeatEnabled(false);
 	sf::Image icon;
 	icon.loadFromFile("resources/icon.png");
@@ -47,13 +47,22 @@ void Game::run()
 		update();
 		render();
 
-		if (mFPSdelay > 0.1f)
+		if (mFPSdelay > 0.15f)
 		{
 			// Render FPS 10 times a second
-			mFPSdelay = 0.f;
+			mFPSdelay = 0.0f;
 			float fps = 1.f / Toolbox::getDeltaTime().asSeconds();
-			mFPStext->setString("FPS: " + Toolbox::floatToString(std::floor(fps)));
+			mFPStext->setString("L - FPS: " + Toolbox::floatToString(std::floor(fps)));
+			if (Toolbox::isFrameRateLocked())
+				mFPStext->setFillColor(sf::Color(145, 0, 27)); // Red
+			else
+				mFPStext->setFillColor(sf::Color(0, 145, 27)); // Green
+
 		}
+		if (Toolbox::isFrameRateLocked())
+			mWindow.setFramerateLimit(FRAMELOCK);
+		else
+			mWindow.setFramerateLimit(0);
 	}
 }
 

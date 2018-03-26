@@ -88,12 +88,12 @@ void Map::loadAgent(std::string line)
 }
 
 
-void Map::loadMap(std::string & mapName)
+void Map::loadMap(Toolbox::LevelCode scenario)
 {
 	// Clear map before loading new
 	unloadMap();
 
-	std::ifstream mapFile(Toolbox::getLevel(Toolbox::LevelCode::LevelDebug));
+	std::ifstream mapFile(Toolbox::getLevel(scenario));
 	std::vector<int> vectorTemp;
 	std::string str;
 	char delimiter = ';';
@@ -158,6 +158,9 @@ void Map::loadMap(std::string & mapName)
 void Map::unloadMap()
 {
 	mMapMain.clear();
+	mEntityManager->exit();
+	PathPlanner::instance()->clear();
+	FlowGenerator::instance()->clear();
 }
 
 void Map::render(sf::RenderWindow& window)

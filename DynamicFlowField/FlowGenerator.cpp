@@ -15,48 +15,7 @@ FlowGenerator::FlowGenerator()
 	mFlowTexture.create(Toolbox::getWindow().getSize().x, Toolbox::getWindow().getSize().y);
 }
 
-
-FlowGenerator::WeightMap & FlowGenerator::generateWeightMap(sf::Vector2i startPos)
-{
-	// TODO: insert return statement here
-	return mPersonalWeightMap;
-
-}
-
-
-FlowGenerator::~FlowGenerator()
-{
-}
-
-void FlowGenerator::render()
-{
-	if (Toolbox::getRenderFlow())
-	{
-		sf::Sprite flow(mFlowTexture.getTexture());
-		Toolbox::getWindow().draw(flow);
-	}
-}
-
-void FlowGenerator::clear()
-{
-	mFlowTexture.clear(sf::Color(0, 0, 0, 0));
-
-	mSharedFlowField.clear();
-
-	mPersonalFlowField.clear();
-}
-
-FlowGenerator::FlowField & FlowGenerator::createFlowFieldStatic(WeightMap& weights)
-{
-	FlowField personalFlowField;
-
-	// TODO: generate flow field
-
-	return personalFlowField;
-
-}
-
-FlowGenerator::FlowField & FlowGenerator::createFlowFieldDynamic(WeightMap& weights)
+FlowGenerator::FlowField & FlowGenerator::generateFlowField(WeightMap & weights, FlowField& workField)
 {
 	// Iterate through all weights
 	for (auto node : weights)
@@ -79,23 +38,21 @@ FlowGenerator::FlowField & FlowGenerator::createFlowFieldDynamic(WeightMap& weig
 				if (building != nullptr && building->getType() != Toolbox::BuildingType::POLYPOINT)
 					nearbyWall = true;
 
-				// Check only horizontal/vertical if there is a wall nearby
+				/* Limit check to only horizontal/vertical if there is a wall nearby.
+				*  This prevents agents from making turns to early and ending up stuck inside a wall
+				*/
 				if (nearbyWall)
 				{
 					if (vertical == 0 || horizontal == 0)
 					{
 						if (weights.find(test) != weights.end())
-						{
 							currentLowestPoint = test;
-						}
 					}
 				}
-				else 
+				else
 				{
 					if (weights.find(test) != weights.end())
-					{
 						currentLowestPoint = test;
-					}
 				}
 			}
 		}
@@ -125,24 +82,72 @@ FlowGenerator::FlowField & FlowGenerator::createFlowFieldDynamic(WeightMap& weig
 			}
 		}
 		// Skip adding direction vector if the current node is on a building point with 0 weight
-		if(weights[node.first] == 0)
+		if (weights[node.first] == 0)
 			continue;
-		
+
 		// Calculate direction to lowest weight node
 		sf::Vector2i lowestWeight(currentLowestPoint.first, currentLowestPoint.second);
 		sf::Vector2f direction;
 		sf::Vector2f globalOrigin = Toolbox::localToGlobalCoords(nodeLocal);
-		             globalOrigin = Toolbox::getMiddleOfBlock(globalOrigin);
-		sf::Vector2f globalA      = Toolbox::localToGlobalCoords(lowestWeight);
-		             globalA      = Toolbox::getMiddleOfBlock(globalA);
+		globalOrigin = Toolbox::getMiddleOfBlock(globalOrigin);
+		sf::Vector2f globalA = Toolbox::localToGlobalCoords(lowestWeight);
+		globalA = Toolbox::getMiddleOfBlock(globalA);
 
 		direction = globalA - globalOrigin;
 
 		// Set the direction vector at the correct position
 		sf::Vector2f normalized = Toolbox::normalize(direction);
-		mSharedFlowField[node.first] = normalized;
+		workField[node.first] = normalized;
 	}
 
+	return workField;
+}
+
+FlowGenerator::~FlowGenerator()
+{
+}
+
+void FlowGenerator::render()
+{
+	if (Toolbox::getRenderFlow())
+	{
+		sf::Sprite flow(mFlowTexture.getTexture());
+		Toolbox::getWindow().draw(flow);
+	}
+}
+
+void FlowGenerator::clear()
+{
+	mFlowTexture.clear(sf::Color(0, 0, 0, 0));
+
+	mSharedFlowField.clear();
+
+	mPersonalFlowField.clear();
+}
+
+// Clear the flow field for each agent, making them generate a completely new one
+FlowGenerator::FlowField & FlowGenerator::createFlowFieldStatic(WeightMap& weights)
+{
+	// Clear between runs
+	mPersonalFlowField.clear();
+
+	// Generate a flow field
+	generateFlowField(weights, mPersonalFlowField);
+
+	// Generate flow, if enabled, to a texture
+	renderFlowToTexture();
+
+	return mPersonalFlowField;
+
+}
+
+// Used the shared field and add to it if neccessary
+FlowGenerator::FlowField & FlowGenerator::createFlowFieldDynamic(WeightMap& weights)
+{
+	// Generate a flow field
+	generateFlowField(weights, mSharedFlowField);
+
+	// Generate flow, if enabled, to a texture
 	renderFlowToTexture();
 
 	return mSharedFlowField;
@@ -153,7 +158,8 @@ void FlowGenerator::renderFlowToTexture()
 	mFlowTexture.clear(sf::Color(0, 0, 0, 0));
 	if (Toolbox::getRenderFlow())
 	{
-		for (FlowGenerator::FlowField::iterator it = mSharedFlowField.begin(); it != mSharedFlowField.end(); it++)
+		FlowField& currentField = Toolbox::getGenerateDynamicFlow() ? mSharedFlowField : mPersonalFlowField;
+		for (FlowGenerator::FlowField::iterator it = currentField.begin(); it != currentField.end(); it++)
 		{
 			sf::Vector2i localStart(it->first.first, it->first.second);
 

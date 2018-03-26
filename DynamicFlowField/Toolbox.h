@@ -14,7 +14,7 @@ private:
 public:
 	enum StringCode { MapSize, Offensive, Defensive, Agent, Null };
 	enum BuildingType { OFFENSIVE, DEFENSIVE, POLYPOINT };
-	enum LevelCode { LevelDebug, Level1, Level2 };
+	enum LevelCode { LevelDebug, Level1, Level2, Level3, Level4, Level5, Level6, Level7, Level8, Level9	};
 	enum TextureCode { BUILDING, WALL, AGENT, POLY };
 
 	static Toolbox* instance();
@@ -41,16 +41,16 @@ public:
 	static std::string floatToString(float f);
 	static std::string boolToString(bool value);
 
-	static sf::Vector2i globalToIndexCoords(sf::Vector2f& pos);
-	static sf::Vector2f localToGlobalCoords(sf::Vector2i& localPos);
+	static sf::Vector2i globalToIndexCoords(const sf::Vector2f& pos);
+	static sf::Vector2f localToGlobalCoords(const sf::Vector2i& localPos);
 
 	static sf::Vector2f getMiddleOfBlock(sf::Vector2f& globalPos);
 
-	// Algorithm courtesy of https://wrf.ecse.rpi.edu//Research/Short_Notes/pnpoly.html
+	// Algorithm from of https://wrf.ecse.rpi.edu//Research/Short_Notes/pnpoly.html
 	static int pointInPoly(int nrOfVerts, std::vector<float>& vertX, std::vector<float>& vertY, float testX, float testY);
 
-	static bool getDynamicOrStatic();
-	static void ToggleDynamicOrStatic();
+	static bool getGenerateDynamicFlow();
+	static void toggleGenerateDynamicFlow();
 
 	static float getMagnitude(sf::Vector2f& vec);
 	static float getDistance(sf::Vector2f& a, sf::Vector2f& b);
@@ -60,6 +60,7 @@ public:
 	static float getDet(sf::Vector2f& vecA, sf::Vector2f& vecB);
 	static float cross(sf::Vector2f& a, sf::Vector2f& b, sf::Vector2f& point);
 
+	// Toggle rendering stuff
 	static bool getRenderWeights();
 	static void toggleRenderWeights();
 	static bool getRenderClosestPoints();
@@ -70,4 +71,13 @@ public:
 	static void toggleRenderConfirmed();
 	static bool getRenderTexts();
 	static void toggleRenderTexts();
+
+	// Toggle ending the scenario
+	static bool isFinished();
+	static void setIsFinished(bool value);
+
+	static bool isFrameRateLocked();
+	static void toggleFrameRateLocked();
+	static void setFrameRateLocked();
+
 };
