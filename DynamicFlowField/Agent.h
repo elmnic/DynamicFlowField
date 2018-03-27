@@ -22,12 +22,13 @@ public:
 	void updatePath();
 	void addTarget(const sf::Vector2i target);
 	sf::Vector2i getTarget() { return mTarget; }
+	void moveAgent(sf::Vector2f& offset);
 		
 private:
 	bool mAlive = true;
 
 	sf::Vector2f             mPosition;
-	float                    mSpeed = 25.f;
+	float                    mSpeed = 40.f;
 	sf::Vector2f             mVelocity;
 	sf::Sprite               mSprite;
 	FlowGenerator::FlowField mFlowField;

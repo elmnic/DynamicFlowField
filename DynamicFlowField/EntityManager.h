@@ -33,21 +33,34 @@ public:
 
 	int getNrOfAgents() { return mAgents.size(); }
 
+	// Removes stored points from buildings and the Confirmed-buildings
 	void exit();
 	void clearAgents();
-	// Removes stored points from buildings and the Confirmed-buildings
 	void clearConfirmed();
+	void clearPolyPoints();
+	void clearBuildings();
 
 	void startAgentSpawner();
 
 	// Returns a pointer to the building if it exists, otherwise it returns nullptr
 	Building* isBuilding(Point point);
 
+	// For editing map
+	void decreaseSize() { mCurrentSize = mCurrentSize > 1 ? mCurrentSize = mCurrentSize - 1 : mCurrentSize = 1; }
+	void increaseSize() { mCurrentSize++; }
+	void setCurrentBuildingType(Toolbox::BuildingType type) { mCurrentBuildingType = type; }
+	void editorAddBuilding(const sf::Vector2i& pos);
+	int &getCurrentSize() { return mCurrentSize; }
+	void removeBuilding(Building* building);
+	EntityVector& getBuildings() { return mBuildings; }
+
 private:
 	EntityManager();
 
 	void checkCollision();
+	void checkCollisionDir(Agent* agent, Building* building);
 	void removeDeadEntities();
+
 
 	bool mFinishedScenario = false;
 
@@ -64,6 +77,10 @@ private:
 	// Render texture for static buildings
 	sf::RenderTexture mBuildingTexture;
 	sf::RenderTexture mConfirmedTexture;
+
+	// For editing map
+	int                   mCurrentSize = 1;
+	Toolbox::BuildingType mCurrentBuildingType = Toolbox::BuildingType::OFFENSIVE;
 
 };
 

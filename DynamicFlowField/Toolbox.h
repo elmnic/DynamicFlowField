@@ -44,9 +44,9 @@ public:
 	static sf::Vector2i globalToIndexCoords(const sf::Vector2f& pos);
 	static sf::Vector2f localToGlobalCoords(const sf::Vector2i& localPos);
 
-	static sf::Vector2f getMiddleOfBlock(sf::Vector2f& globalPos);
+	static sf::Vector2f getMiddleOfBlock(const sf::Vector2f& globalPos);
 
-	// Algorithm from of https://wrf.ecse.rpi.edu//Research/Short_Notes/pnpoly.html
+	// Algorithm from https://wrf.ecse.rpi.edu//Research/Short_Notes/pnpoly.html
 	static int pointInPoly(int nrOfVerts, std::vector<float>& vertX, std::vector<float>& vertY, float testX, float testY);
 
 	static bool getGenerateDynamicFlow();
@@ -79,5 +79,8 @@ public:
 	static bool isFrameRateLocked();
 	static void toggleFrameRateLocked();
 	static void setFrameRateLocked();
+
+	static bool isBuildingKilled();
+	static void setBuildingKilled(bool value);
 
 };

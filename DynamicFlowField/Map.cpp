@@ -92,11 +92,17 @@ void Map::loadMap(Toolbox::LevelCode scenario)
 {
 	// Clear map before loading new
 	unloadMap();
-
+	mCurrentScenario = scenario;
 	std::ifstream mapFile(Toolbox::getLevel(scenario));
 	std::vector<int> vectorTemp;
 	std::string str;
 	char delimiter = ';';
+
+	if (mapFile.fail())
+	{
+		std::cout << "File doesn't exist!" << "\n";
+		return;
+	}
 
 	while (std::getline(mapFile, str, delimiter))
 	{
@@ -130,6 +136,8 @@ void Map::loadMap(Toolbox::LevelCode scenario)
 		}
 	}
 
+	mapFile.close();
+
 	// Render background tiles to a separate texture 
 	float sizeX = Toolbox::getMapBlockSize().x;
 	float sizeY = Toolbox::getMapBlockSize().y;
@@ -158,9 +166,40 @@ void Map::loadMap(Toolbox::LevelCode scenario)
 void Map::unloadMap()
 {
 	mMapMain.clear();
+	mRenderTexture.clear(sf::Color(0, 0, 0, 0));
 	mEntityManager->exit();
 	PathPlanner::instance()->clear();
 	FlowGenerator::instance()->clear();
+}
+
+void Map::saveMap()
+{
+	std::cout << "Saving map...\n";
+	std::ofstream mapFile(Toolbox::getLevel(mCurrentScenario), std::ofstream::trunc);
+	EntityManager::EntityVector buildings = EntityManager::instance()->getBuildings();
+
+	// Begin with writing the map size
+	mapFile << "Map," + 
+		std::to_string(Toolbox::getMapDimensions().x) + 
+		"," + 
+		std::to_string(Toolbox::getMapDimensions().y) + 
+		";";
+
+	for (auto it : buildings)
+	{
+		Building* b = (Building*)it;
+		sf::Vector2i index = Toolbox::globalToIndexCoords(b->getPosition());
+		if (b->getType() == Toolbox::BuildingType::OFFENSIVE)
+			mapFile << "Off,";
+		else if (b->getType() == Toolbox::BuildingType::DEFENSIVE)
+			mapFile << "Def,";
+		mapFile << std::to_string(b->getSize()) + ",";
+		mapFile << std::to_string(index.x) + "," + std::to_string(index.y) + ";";
+	}
+
+
+	mapFile.close();
+	std::cout << "Saved\n";
 }
 
 void Map::render(sf::RenderWindow& window)

@@ -9,6 +9,29 @@ EntityManager* EntityManager::instance()
 }
 
 
+void EntityManager::editorAddBuilding(const sf::Vector2i& pos)
+{
+	// Create a building if the point is not occupied
+	Point p(pos.x, pos.y);
+	if (isBuilding(p) == nullptr)
+		createBuilding(mCurrentSize, mCurrentBuildingType, pos);
+}
+
+void EntityManager::removeBuilding(Building * building)
+{
+	// Erase the points from the buildingMap
+	sf::Vector2i pos = Toolbox::globalToIndexCoords(building->getPosition());
+	int size = building->getSize();
+	for (int i = 0; i < size; i++)
+	{
+		for (int j = 0; j < size; j++)
+		{
+			Point p(pos.x + i, pos.y + j);
+			mBuildingMap.erase(p);
+		}
+	}
+}
+
 EntityManager::EntityManager()
 {
 	mBuildingTexture.create(Toolbox::getWindow().getSize().x, Toolbox::getWindow().getSize().y);
@@ -26,22 +49,69 @@ void EntityManager::checkCollision()
 	for (auto building : mBuildings)
 	{
 		Building *b = (Building*)building;
-		if (b->getType() == Toolbox::BuildingType::OFFENSIVE)
+
+		for (auto agent : mAgents)
 		{
-			for (auto agent : mAgents)
+			if (agent->getSprite().getGlobalBounds().intersects(building->getSprite().getGlobalBounds()))
 			{
-				if (agent->getSprite().getGlobalBounds().intersects(building->getSprite().getGlobalBounds()))
+				if (b->getType() == Toolbox::BuildingType::OFFENSIVE)
 				{
 					agent->kill();
 					b->damage();
 				}
+				/*else if (b->getType() == Toolbox::BuildingType::DEFENSIVE)
+				{
+					checkCollisionDir((Agent*)agent, b);
+				}*/
 			}
 		}
 	}
 }
 
+void EntityManager::checkCollisionDir(Agent* agent, Building* building)
+{
+	float player_bottom = agent->getPosition().y + agent->getSprite().getGlobalBounds().height;
+	float tiles_bottom = building->getPosition().y + building->getSprite().getGlobalBounds().height;
+	float player_right = agent->getPosition().x + agent->getSprite().getGlobalBounds().width;
+	float tiles_right = building->getPosition().x + building->getSprite().getGlobalBounds().width;
+
+	float b_collision = tiles_bottom - agent->getPosition().y;
+	float t_collision = player_bottom - building->getPosition().y;
+	float l_collision = player_right - building->getPosition().x;
+	float r_collision = tiles_right - agent->getPosition().x;
+
+	sf::Vector2f offset(0, 0);
+	if (t_collision < b_collision && t_collision < l_collision && t_collision < r_collision)
+	{
+		//Top collision
+		offset.y = building->getPosition().y - player_bottom;
+		//std::cout << "Top\n";
+	}
+	if (b_collision < t_collision && b_collision < l_collision && b_collision < r_collision)
+	{
+		//Bottom collision
+		offset.y = building->getPosition().y + building->getSprite().getGlobalBounds().height - agent->getPosition().y;
+		//std::cout << "Bottom\n";
+	}
+	if (l_collision < r_collision && l_collision < t_collision && l_collision < b_collision)
+	{
+		//Left collision
+		offset.x = player_right - building->getPosition().x;
+		//std::cout << "Left\n";
+	}
+	if (r_collision < l_collision && r_collision < t_collision && r_collision < b_collision)
+	{
+		//Right collision
+		offset.x = building->getPosition().x + building->getSprite().getGlobalBounds().width - agent->getPosition().x;
+		//std::cout << "Right\n";
+	}
+	agent->moveAgent(offset);
+}
+
 void EntityManager::removeDeadEntities()
 {
+	Toolbox::setBuildingKilled(false);
+
 	// Deletes all dead buildings
 	EntityVector buildings = mBuildings;
 	mBuildings.clear();
@@ -52,14 +122,46 @@ void EntityManager::removeDeadEntities()
 		else
 		{
 			// Building is to be removed.
+			Building* b = (Building*)it;
+			removeBuilding(b);
+			b->clearPolyPoint();
 			delete it;
-			Toolbox::setIsFinished(true);
-			updateBuildingTexture();
+			Toolbox::setBuildingKilled(true);
+		}
+	}
+	// Remove Confirmed buildings if an offensive building was destroyed
+	if (Toolbox::isBuildingKilled())
+	{
+		EntityVector buildings = mBuildings;
+		mBuildings.clear();
+		for (auto it : buildings)
+		{
+			Building *b = (Building*)it;
+			if (b->getType() != Toolbox::BuildingType::POLYPOINT)
+				mBuildings.push_back(it);
+			else
+				delete it;
+			b->clearPolyPoint();
 		}
 	}
 
-	if (mBuildings.empty())
-		mFinishedScenario = true;
+	if (Toolbox::isBuildingKilled())
+		mConfirmed.clear();
+
+	if (buildings.size() != mBuildings.size())
+		updateBuildingTexture();
+
+	// Checks if there are any offensive buildings that could be targeted left
+	bool targetsLeft = false;
+	for (auto targetBuildingCheck : mBuildings)
+	{
+		Building *b = (Building*)targetBuildingCheck;
+		if (b->getType() == Toolbox::BuildingType::OFFENSIVE)
+			targetsLeft = true;
+	}
+
+	if (!targetsLeft)
+		Toolbox::setIsFinished(true);
 
 	// Deletes all dead agents
 	EntityVector agents = mAgents;
@@ -109,7 +211,7 @@ void EntityManager::createBuilding(int size, Toolbox::BuildingType type, sf::Vec
 		for (int j = 0; j < size; j++)
 		{
 			Point p(pos.x + i, pos.y + j);
-			mBuildingMap.insert(std::make_pair(p, building));
+			mBuildingMap[p] = building;
 		}
 	}
 
@@ -145,8 +247,8 @@ void EntityManager::queueAgent(sf::Vector2i startPos, float spawnTime)
 
 void EntityManager::startAgentSpawner()
 {
-	AgentSpawner::instance()->run();
 	Toolbox::setIsFinished(false);
+	AgentSpawner::instance()->run();
 }
 
 // Search a point and return its building if it exists
@@ -161,23 +263,16 @@ Building * EntityManager::isBuilding(Point point)
 
 void EntityManager::update()
 {
+
 	AgentSpawner::instance()->update();
 
 	for (auto it : mBuildings)
 		it->update();
 
 	for (auto it : mAgents)
-	{
 		it->update();
-		Agent* agent = (Agent*)it;
-		// Target was found dead, search for new 
-		if (mBuildingsKilled)
-		{
-			agent->updatePath();
-			mBuildingsKilled = false;
-		}
 
-	}
+	Toolbox::setBuildingKilled(false);
 
 	checkCollision();
 
@@ -211,17 +306,7 @@ void EntityManager::render(sf::RenderWindow & window)
 
 void EntityManager::exit()
 {
-	for (auto it : mBuildings)
-		delete it;
-
-	for (BuildingMap::iterator it = mBuildingMap.begin(), next_it = mBuildingMap.begin(); it != mBuildingMap.end(); it = next_it)
-	{
-		next_it = it; ++next_it;
-		mBuildingMap.erase(it);
-	}
-	mBuildings.clear();
-	mBuildingMap.clear();
-
+	clearBuildings();
 	clearConfirmed();
 	clearAgents();
 }
@@ -236,12 +321,6 @@ void EntityManager::clearAgents()
 
 void EntityManager::clearConfirmed()
 {
-	for (size_t i = 0; i < mBuildings.size(); i++)
-	{
-		Building* b = (Building*)mBuildings[i];
-		b->clearPolyPoint();
-	}
-
 	for (size_t i = 0; i < mConfirmed.size(); i++)
 	{
 		Building* b = (Building*)mConfirmed[i];
@@ -251,4 +330,29 @@ void EntityManager::clearConfirmed()
 		delete mConfirmed[i];
 	}
 	mConfirmed.clear();
+	updateConfirmedTexture();
+}
+
+void EntityManager::clearPolyPoints()
+{
+	for (size_t i = 0; i < mBuildings.size(); i++)
+	{
+		Building* b = (Building*)mBuildings[i];
+		b->clearPolyPoint();
+	}
+}
+
+void EntityManager::clearBuildings()
+{
+	for (auto it : mBuildings)
+		delete it;
+
+	for (BuildingMap::iterator it = mBuildingMap.begin(), next_it = mBuildingMap.begin(); it != mBuildingMap.end(); it = next_it)
+	{
+		next_it = it; ++next_it;
+		mBuildingMap.erase(it);
+	}
+	mBuildings.clear();
+	mBuildingMap.clear();
+	updateBuildingTexture();
 }

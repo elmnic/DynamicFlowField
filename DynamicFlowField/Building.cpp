@@ -182,13 +182,15 @@ bool Building::isPointInPoly(sf::Vector2i & point)
 
 void Building::clearPolyPoint()
 {
+	Point temp = mIndices[0];
 	mIndices.clear();
+	mIndices.push_back(temp);
 }
 
 
 void Building::toggleIndices()
 {
-	std::cout << "Nr of indices: " << mIndices.size() << "\n";
+	//std::cout << "Nr of indices: " << mIndices.size() << "\n";
 	mRenderIndices = !mRenderIndices;
 	if (mRenderIndices)
 		mSprite.setColor(sf::Color(0, 128, 34));

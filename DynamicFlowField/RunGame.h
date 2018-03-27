@@ -20,6 +20,10 @@ private:
 
 	void updateText(std::string text, sf::Text* sfText, bool status);
 	void changeScenario(sf::Event& event);
+	void spawnAgent(sf::Vector2f& mouseCoords);
+
+	float mAgentSpawnDelay = 0.f;
+	bool mRapidSpawning = false;
 
 	sf::RenderWindow* mWindow;
 	sf::Text* mStateText;

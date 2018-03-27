@@ -32,7 +32,8 @@ public:
 	static PathPlanner* instance();
 	~PathPlanner();
 
-	FlowGenerator::FlowField generatePath(sf::Vector2f startPos, Agent* agent);
+	FlowGenerator::FlowField& generatePath(sf::Vector2f startPos, Agent* agent);
+	void update();
 	void render();
 	void renderWeightToTexture();
 	void clear();

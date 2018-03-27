@@ -29,6 +29,10 @@ Agent::~Agent()
 
 void Agent::update()
 {
+	if (Toolbox::isBuildingKilled() && !Toolbox::isFinished())
+		updatePath();
+
+
 	// Calculate which block the agent's middle is in
 	sf::Vector2f direction;
 	sf::Vector2f globalSpriteMid = mSprite.getPosition();
@@ -38,8 +42,17 @@ void Agent::update()
 	FlowGenerator::Point point(localIndex.x, localIndex.y);
 	
 	// Get velocity direction from flow field
-	mVelocity = mFlowField[point];
+	if (Toolbox::getDistance(globalSpriteMid, globalBlockMid) <= 20.f)
+	{
+		mVelocity = mFlowField[point];
+	}
 	mSprite.move(mVelocity * mSpeed * Toolbox::getDeltaTime().asSeconds());
+
+	// If agent is considered stopped, update path again
+	if (mVelocity.x < 0.01f && mVelocity.y < 0.01f && mVelocity.x > -0.01f && mVelocity.y > -0.01f && !Toolbox::isFinished())
+	{
+		updatePath();
+	}
 }
 
 void Agent::render(sf::RenderWindow& window)
@@ -55,10 +68,16 @@ void Agent::kill()
 // Called when spawning and when current target is lost
 void Agent::updatePath()
 {
-	mFlowField = PathPlanner::instance()->generatePath(mSprite.getPosition(), this);
+	sf::Vector2f middle = Toolbox::getMiddleOfBlock(mSprite.getPosition());
+	mFlowField = PathPlanner::instance()->generatePath(middle, this);
 }
 
 void Agent::addTarget(const sf::Vector2i target)
 {
 	mTarget = target;
+}
+
+void Agent::moveAgent(sf::Vector2f & offset)
+{
+	mSprite.move(offset);
 }

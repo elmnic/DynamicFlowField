@@ -16,7 +16,12 @@ private:
 	EditMap(const EditMap&);
 	EditMap& operator=(const EditMap&);
 
+	void changeScenario(sf::Event& event);
+
 	sf::RenderWindow* mWindow;
 	sf::Text* mStateText;
+	sf::Text* mScenarioNrText;
+	sf::Text* mCurrentBuildingText;
+	sf::Text* mSizeText;
 };
 

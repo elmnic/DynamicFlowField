@@ -68,7 +68,8 @@ void AgentSpawner::run()
 
 void AgentSpawner::clear()
 {
-	if (!mAgentQueue.empty()) mAgentQueue.clear();
+	if (!mAgentQueue.empty()) 
+		mAgentQueue.clear();
 	mRunning = false;
 }
 

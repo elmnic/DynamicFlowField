@@ -35,7 +35,7 @@ FlowGenerator::FlowField & FlowGenerator::generateFlowField(WeightMap & weights,
 			{
 				FlowGenerator::Point test(col + horizontal, row + vertical);
 				Building* building = EntityManager::instance()->isBuilding(test);
-				if (building != nullptr && building->getType() != Toolbox::BuildingType::POLYPOINT)
+				if (building != nullptr && building->getType() == Toolbox::BuildingType::DEFENSIVE)
 					nearbyWall = true;
 
 				/* Limit check to only horizontal/vertical if there is a wall nearby.
@@ -119,6 +119,7 @@ void FlowGenerator::render()
 void FlowGenerator::clear()
 {
 	mFlowTexture.clear(sf::Color(0, 0, 0, 0));
+	renderFlowToTexture();
 
 	mSharedFlowField.clear();
 

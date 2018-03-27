@@ -40,8 +40,8 @@ private:
 	Map();
 	MapMain mMapMain;
 	EntityManager *mEntityManager;
-
 	sf::RenderTexture mRenderTexture;
+	Toolbox::LevelCode mCurrentScenario = Toolbox::LevelDebug;
 
 	// Converts string to enum
 	Toolbox::StringCode hashit(std::string const& str);

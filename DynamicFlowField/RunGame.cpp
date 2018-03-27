@@ -46,7 +46,11 @@ void RunGame::enter(sf::RenderWindow& window)
 void RunGame::update(Game* game)
 {
 	if (!Toolbox::isFinished())
+	{
+		mAgentSpawnDelay += Toolbox::getDeltaTime().asSeconds();
+		PathPlanner::instance()->update();
 		EntityManager::instance()->update();
+	}
 	
 	mNrOfAgentsText->setString("Agents: " + std::to_string(EntityManager::instance()->getNrOfAgents()));
 }
@@ -64,7 +68,6 @@ void RunGame::exit()
 {
 	Map::instance()->unloadMap();
 	EntityManager::instance()->exit();
-	EntityManager::instance()->clearConfirmed();
 	TextRenderer::instance()->clearTextElements();
 	PathPlanner::instance()->clear();
 	FlowGenerator::instance()->clear();
@@ -118,8 +121,8 @@ void RunGame::propagateEvent(Game* game, sf::Event& event)
 		Toolbox::toggleFrameRateLocked();
 
 	if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Space) {
-		Map::instance()->startSimulation();
 		Toolbox::setIsFinished(false);
+		Map::instance()->startSimulation();
 	}
 
 	if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
@@ -137,13 +140,23 @@ void RunGame::propagateEvent(Game* game, sf::Event& event)
 			EntityManager::instance()->updateBuildingTexture();
 		}
 
-		// Only spawn on ground and confirmed
-		if (building != nullptr && building->getType() == Toolbox::BuildingType::POLYPOINT || 
-			building == nullptr)
+		spawnAgent(mouseCoords);
+	}
+
+	//############################################### Spara undan musens position möjligtvis
+	if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Right) {
+		mRapidSpawning = true;
+		
+		if (mRapidSpawning && mAgentSpawnDelay > 0.15f)
 		{
-			EntityManager::instance()->createAgent(localCoords);
+			mAgentSpawnDelay = 0.f;
+			sf::Vector2f mouseCoords((float)event.mouseButton.x, (float)event.mouseButton.y);
+			spawnAgent(mouseCoords);
 		}
 	}
+
+	if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Right)
+		mRapidSpawning = false;
 }
 
 StateBase::StateID RunGame::getStateID()
@@ -172,39 +185,62 @@ void RunGame::changeScenario(sf::Event& event)
 	{
 	case sf::Keyboard::Num0:
 		scenario = Toolbox::LevelCode::LevelDebug;
-		Toolbox::setIsFinished(false);
+		mScenarioNrText->setString("Scenario Debug");
 		break;
 	case sf::Keyboard::Num1:
 		scenario = Toolbox::LevelCode::Level1;
+		mScenarioNrText->setString("Scenario 1");
 		break;
 	case sf::Keyboard::Num2:
 		scenario = Toolbox::LevelCode::Level2;
+		mScenarioNrText->setString("Scenario 2");
 		break;
 	case sf::Keyboard::Num3:
 		scenario = Toolbox::LevelCode::Level3;
+		mScenarioNrText->setString("Scenario 3");
 		break;
 	case sf::Keyboard::Num4:
 		scenario = Toolbox::LevelCode::Level4;
+		mScenarioNrText->setString("Scenario 4");
 		break;
 	case sf::Keyboard::Num5:
 		scenario = Toolbox::LevelCode::Level5;
+		mScenarioNrText->setString("Scenario 5");
 		break;
 	case sf::Keyboard::Num6:
 		scenario = Toolbox::LevelCode::Level6;
+		mScenarioNrText->setString("Scenario 6");
 		break;
 	case sf::Keyboard::Num7:
 		scenario = Toolbox::LevelCode::Level7;
+		mScenarioNrText->setString("Scenario 7");
 		break;
 	case sf::Keyboard::Num8:
 		scenario = Toolbox::LevelCode::Level8;
+		mScenarioNrText->setString("Scenario 8");
 		break;
 	case sf::Keyboard::Num9:
 		scenario = Toolbox::LevelCode::Level9;
+		mScenarioNrText->setString("Scenario 9");
 		break;
 	default:
 		scenario = Toolbox::LevelCode::LevelDebug;
-		Toolbox::setIsFinished(false);
+		mScenarioNrText->setString("Scenario Debug");
 		break;
 	}
+	Toolbox::setIsFinished(false);
 	Map::instance()->loadMap(scenario);
+}
+
+void RunGame::spawnAgent(sf::Vector2f & mouseCoords)
+{
+	sf::Vector2i localCoords = Toolbox::globalToIndexCoords(mouseCoords);
+	EntityManager::Point point(localCoords.x, localCoords.y);
+	Building* building = EntityManager::instance()->isBuilding(point);
+	// Only spawn on ground and confirmed
+	if (building != nullptr && building->getType() == Toolbox::BuildingType::POLYPOINT ||
+		building == nullptr)
+	{
+		EntityManager::instance()->createAgent(localCoords);
+	}
 }

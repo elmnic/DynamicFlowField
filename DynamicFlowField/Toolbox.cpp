@@ -2,7 +2,15 @@
 
 static sf::Vector2i mMapDimensions;
 static std::string mLevelDebug = "resources/Debug.dat";
-static std::string mLevel1 = "resources/Debug.dat";
+static std::string mLevel1     = "resources/Level1.dat";
+static std::string mLevel2     = "resources/Level2.dat";
+static std::string mLevel3     = "resources/Level3.dat";
+static std::string mLevel4     = "resources/Level4.dat";
+static std::string mLevel5     = "resources/Level5.dat";
+static std::string mLevel6     = "resources/Level6.dat";
+static std::string mLevel7     = "resources/Level7.dat";
+static std::string mLevel8     = "resources/Level8.dat";
+static std::string mLevel9     = "resources/Level9.dat";
 static sf::RenderWindow* mWindow;
 static sf::Time mTime;
 static sf::Vector2f mBlockSize;
@@ -29,6 +37,7 @@ static std::atomic<bool> mRenderTexts = true;
 
 static std::atomic<bool> mIsFinished = false;
 static std::atomic<bool> mIsFrameRateLocked = true;
+static std::atomic<bool> mIsBuildingKilled = false;
 
 static float const PI = 3.1415926535897932384f;
 
@@ -49,12 +58,33 @@ std::string Toolbox::getLevel(LevelCode code)
 		return mLevel1;
 		break;
 	case Toolbox::Level2:
+		return mLevel2;
+		break;
+	case Toolbox::Level3:
+		return mLevel3;
+		break;
+	case Toolbox::Level4:
+		return mLevel4;
+		break;
+	case Toolbox::Level5:
+		return mLevel5;
+		break;
+	case Toolbox::Level6:
+		return mLevel6;
+		break;
+	case Toolbox::Level7:
+		return mLevel7;
+		break;
+	case Toolbox::Level8:
+		return mLevel8;
+		break;
+	case Toolbox::Level9:
+		return mLevel9;
 		break;
 	default:
 		return mLevelDebug;
 		break;
 	}
-	return mLevelDebug;
 }
 
 Toolbox::Toolbox()
@@ -175,12 +205,13 @@ sf::Vector2f Toolbox::localToGlobalCoords(const sf::Vector2i& localPos)
 	return global;
 }
 
-sf::Vector2f Toolbox::getMiddleOfBlock(sf::Vector2f & globalPos)
+sf::Vector2f Toolbox::getMiddleOfBlock(const sf::Vector2f & globalPos)
 {
 	sf::Vector2f middle(globalPos.x + getMapBlockSize().x / 2, globalPos.y + getMapBlockSize().y / 2);
 	return middle;
 }
 
+// External algorithm from https://wrf.ecse.rpi.edu//Research/Short_Notes/pnpoly.html
 int Toolbox::pointInPoly(int nrOfVerts, std::vector<float>& vertX, std::vector<float>& vertY, float testX, float testY)
 {
 	int i, j, c = 0;
@@ -319,5 +350,15 @@ void Toolbox::toggleFrameRateLocked()
 void Toolbox::setFrameRateLocked()
 {
 	mIsFrameRateLocked = true;
+}
+
+bool Toolbox::isBuildingKilled()
+{
+	return mIsBuildingKilled;
+}
+
+void Toolbox::setBuildingKilled(bool value)
+{
+	mIsBuildingKilled = value;
 }
 

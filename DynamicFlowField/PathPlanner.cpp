@@ -36,9 +36,13 @@ void PathPlanner::clear()
 	mShortestPathTexture.clear(sf::Color(0, 0, 0, 0));
 	mWeightTexture.clear(sf::Color(0, 0, 0, 0));
 	mWeightMap.clear();
+	renderWeightToTexture();
+	mFlowField.clear();
+	FlowGenerator::instance()->clear();
+	//EntityManager::instance()->clearConfirmed();
 }
 
-FlowGenerator::FlowField PathPlanner::generatePath(sf::Vector2f startPos, Agent* agent)
+FlowGenerator::FlowField& PathPlanner::generatePath(sf::Vector2f startPos, Agent* agent)
 {
 	// Clear Lookup and Queue
 	clearNodes();
@@ -49,11 +53,11 @@ FlowGenerator::FlowField PathPlanner::generatePath(sf::Vector2f startPos, Agent*
 	// Create start node
 	EntityManager::Point pStart(localCoordIndex.x, localCoordIndex.y);
 
-	// Check if startPos is already confirmed. Exit and use pre-existing flow field if true
+	// Check if startPos is already confirmed. Exit and use pre-existing flow field if generation is set to static
 	Building* testFor = EntityManager::instance()->isBuilding(pStart);
 	if (testFor != nullptr && testFor->getType() == Toolbox::BuildingType::POLYPOINT && Toolbox::getGenerateDynamicFlow())
 	{
-		std::cout << "Start pos was already confirmed\n";
+		//std::cout << "Start pos was already confirmed\n";
 		return mFlowField;
 	}
 
@@ -61,8 +65,8 @@ FlowGenerator::FlowField PathPlanner::generatePath(sf::Vector2f startPos, Agent*
 	if (testFor != nullptr && (testFor->getType() == Toolbox::BuildingType::OFFENSIVE || 
 		testFor->getType() == Toolbox::BuildingType::DEFENSIVE))
 	{
-		std::cout << "Start was on building\n";
-		return FlowGenerator::FlowField();
+		//std::cout << "Start was on building\n";
+		return mFlowField;
 	}
 
 	// Add first node to queue
@@ -112,7 +116,7 @@ FlowGenerator::FlowField PathPlanner::generatePath(sf::Vector2f startPos, Agent*
 				// Point was already confirmed, return the flow field if generation is set to dynamic
 				if (target != nullptr && target->isPointInPoly(localCoordIndex) && Toolbox::getGenerateDynamicFlow())
 				{
-					std::cout << "Point was already confirmed\n";
+					//std::cout << "Point was already confirmed\n";
 					EntityManager::instance()->createConfirmed(localCoordIndex);
 					return mFlowField;
 				}
@@ -144,6 +148,14 @@ FlowGenerator::FlowField PathPlanner::generatePath(sf::Vector2f startPos, Agent*
 	}
 	
 	return mFlowField;
+}
+
+void PathPlanner::update()
+{
+	if (Toolbox::isBuildingKilled())
+	{
+		clear();
+	}
 }
 
 void PathPlanner::expandChildren(WeightNode* current)
